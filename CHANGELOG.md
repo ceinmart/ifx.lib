@@ -1,8 +1,16 @@
 # Changelog - ifxlib
 
-Versao do documento: 1.4.1.
-Criado em: 2026-11-12 14:56:27 -0300.
+Versao do documento: 1.4.2.
+Criado em: 2026-11-12 15:02:56 -0300.
 Criado por: ChatGPT - OpenAI.
+
+## 1.4.2 - 2026-11-12
+
+- Revisado o README para manter apenas documentacao operacional.
+- Documentados os procedimentos de atualizacao com reinicio e online.
+- Documentadas a retirada e a exclusao segura de uma versao anterior.
+- Documentada a desinstalacao completa.
+- Esclarecido que o autorregistro e exclusivo dos DataBlades padrao instalados com o servidor.
 
 ## 1.4.1 - 2026-11-12
 

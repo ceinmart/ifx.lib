@@ -1,8 +1,8 @@
 #!/bin/sh
 # Projeto: ifxlib
 # Arquivo: unregister.sh
-# Versao: 1.4.1
-# Criado em: 2026-11-12 14:56:27 -0300
+# Versao: 1.4.2
+# Criado em: 2026-11-12 15:02:56 -0300
 # Criado por: ChatGPT - OpenAI
 
 set -eu
