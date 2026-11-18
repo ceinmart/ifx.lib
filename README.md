@@ -1,6 +1,6 @@
 # ifxlib
 
-Versao 1.4.2 - criada em 2026-11-12 15:02:56 -0300 pelo ChatGPT - OpenAI.
+Versao 1.4.3 - criada em 2026-11-12 15:55:58 -0300 pelo ChatGPT - OpenAI.
 
 Biblioteca de UDRs C para HCL Informix 14.10 em Linux x86_64.
 
@@ -29,6 +29,7 @@ $INFORMIXDIR/extend/ifxlib.1.4.UC1/
 |-- register.sql
 |-- unregister.sql
 |-- test.sql
+|-- fix_vp_class.sql
 |-- register.sh
 |-- unregister.sh
 |-- example_spl.sql
@@ -43,8 +44,8 @@ $INFORMIXDIR/extend/ifxlib.1.4.UC1/
 ```bash
 # Projeto: ifxlib
 # Instalacao
-# Versao: 1.4.2
-# Criado em: 2026-11-12 15:02:56 -0300
+# Versao: 1.4.3
+# Criado em: 2026-11-12 15:55:58 -0300
 # Criado por: ChatGPT - OpenAI
 
 export INFORMIXDIR=/opt/informix
@@ -61,8 +62,8 @@ Alternativamente:
 ```bash
 # Projeto: ifxlib
 # Compilacao e deploy por Makefile
-# Versao: 1.4.2
-# Criado em: 2026-11-12 15:02:56 -0300
+# Versao: 1.4.3
+# Criado em: 2026-11-12 15:55:58 -0300
 # Criado por: ChatGPT - OpenAI
 
 make clean
@@ -73,6 +74,148 @@ make test DB=nome_do_banco
 ```
 
 As UDRs sao registradas separadamente em cada banco que for utiliza-las.
+
+## Correcao do erro de VP das versoes 1.4.0 a 1.4.2
+
+As versoes 1.4.0 a 1.4.2 registravam incorretamente a classe de VP como
+`cpu vp`. O Informix interpretava esse texto como o nome de uma classe e
+retornava o erro `-9799` porque essa classe nao existe.
+
+A versao 1.4.3 remove o modificador `CLASS`; por default, as UDRs C executam
+em CPU VP.
+
+Para corrigir um banco que ja foi registrado, nao e necessario recompilar nem
+registrar novamente. Execute:
+
+```bash
+# Projeto: ifxlib
+# Correcao do registro da classe de VP
+# Versao: 1.4.3
+# Criado em: 2026-11-12 15:55:58 -0300
+# Criado por: ChatGPT - OpenAI
+
+dbaccess nome_do_banco sql/fix_vp_class.sql
+
+# Alternativa equivalente:
+make fix-vp DB=nome_do_banco
+```
+
+O script executa `ALTER PROCEDURE/FUNCTION ... WITH (DROP CLASS)` nas seis
+assinaturas e preserva as rotinas e suas permissoes.
+
+## Exemplos de uso
+
+### Data e hora atual
+
+Em SQL:
+
+```sql
+-- Projeto: ifxlib
+-- Exemplo de sp_current2
+-- Versao: 1.4.3
+-- Criado em: 2026-11-12 15:55:58 -0300
+-- Criado por: ChatGPT - OpenAI
+
+EXECUTE FUNCTION sp_current2();
+
+SELECT sp_current2() AS agora
+  FROM systables
+ WHERE tabid = 1;
+```
+
+Em SPL:
+
+```sql
+-- Projeto: ifxlib
+-- Exemplo SPL de sp_current2
+-- Versao: 1.4.3
+-- Criado em: 2026-11-12 15:55:58 -0300
+-- Criado por: ChatGPT - OpenAI
+
+DEFINE v_agora DATETIME YEAR TO FRACTION(3);
+LET v_agora = sp_current2();
+```
+
+### Controle de yield da sessao
+
+```sql
+-- Projeto: ifxlib
+-- Exemplos de sp_cpu
+-- Versao: 1.4.3
+-- Criado em: 2026-11-12 15:55:58 -0300
+-- Criado por: ChatGPT - OpenAI
+
+-- Executa mi_yield() em toda chamada.
+EXECUTE PROCEDURE sp_cpu(0);
+EXECUTE PROCEDURE sp_cpu();
+
+-- Executa mi_yield() a cada 1000 chamadas de sp_cpu().
+EXECUTE PROCEDURE sp_cpu(1000);
+EXECUTE PROCEDURE sp_cpu();
+
+-- Desativa: sp_cpu() nao executa mi_yield().
+EXECUTE PROCEDURE sp_cpu(-1);
+EXECUTE PROCEDURE sp_cpu();
+
+-- Alias de compatibilidade; usa o mesmo estado da sessao.
+EXECUTE PROCEDURE sp_yield(10000);
+EXECUTE PROCEDURE sp_yield();
+```
+
+O intervalo configurado permanece na sessao ate outra chamada de
+`sp_cpu(INTEGER)`, `sp_yield(INTEGER)` ou `sp_cpu_apply_policy()`.
+
+### Uso dentro de um loop SPL
+
+```sql
+-- Projeto: ifxlib
+-- Exemplo de yield em loop SPL
+-- Versao: 1.4.3
+-- Criado em: 2026-11-12 15:55:58 -0300
+-- Criado por: ChatGPT - OpenAI
+
+CREATE PROCEDURE exemplo_ifxlib()
+    DEFINE v_contador INTEGER;
+    DEFINE v_agora DATETIME YEAR TO FRACTION(3);
+
+    LET v_contador = 0;
+    EXECUTE PROCEDURE sp_cpu(1000);
+
+    WHILE v_contador < 100000
+        LET v_contador = v_contador + 1;
+
+        -- Processamento da procedure.
+
+        EXECUTE PROCEDURE sp_cpu();
+
+        IF MOD(v_contador, 1000) = 0 THEN
+            LET v_agora = sp_current2();
+        END IF;
+    END WHILE;
+END PROCEDURE;
+```
+
+### Politica administrativa
+
+```sql
+-- Projeto: ifxlib
+-- Exemplos de politica administrativa
+-- Versao: 1.4.3
+-- Criado em: 2026-11-12 15:55:58 -0300
+-- Criado por: ChatGPT - OpenAI
+
+-- Forca yield a cada 1000 chamadas. sp_cpu(N) sera ignorado.
+EXECUTE PROCEDURE sp_cpu_apply_policy(1, 1000);
+
+-- Forca o mecanismo desativado.
+EXECUTE PROCEDURE sp_cpu_apply_policy(1, -1);
+
+-- Remove o force e define 10000 como default alteravel.
+EXECUTE PROCEDURE sp_cpu_apply_policy(0, 10000);
+```
+
+Para aplicar a politica automaticamente na abertura da sessao, adapte
+`example_sysdbopen.sql` ao `sysdbopen` existente no banco.
 
 ## Autorregistro
 
@@ -88,8 +231,8 @@ Nesta distribuicao, o registro deve ser executado explicitamente em cada banco:
 ```bash
 # Projeto: ifxlib
 # Registro em um banco
-# Versao: 1.4.2
-# Criado em: 2026-11-12 15:02:56 -0300
+# Versao: 1.4.3
+# Criado em: 2026-11-12 15:55:58 -0300
 # Criado por: ChatGPT - OpenAI
 
 ./register.sh nome_do_banco
@@ -107,8 +250,8 @@ Antes de atualizar, consulte em cada banco qual biblioteca esta registrada:
 ```sql
 -- Projeto: ifxlib
 -- Verificacao antes da atualizacao
--- Versao: 1.4.2
--- Criado em: 2026-11-12 15:02:56 -0300
+-- Versao: 1.4.3
+-- Criado em: 2026-11-12 15:55:58 -0300
 -- Criado por: ChatGPT - OpenAI
 
 SELECT procname, numargs, externalname
@@ -142,8 +285,8 @@ versao diferente. Exemplo:
 ```bash
 # Projeto: ifxlib
 # Instalacao online do novo binario
-# Versao: 1.4.2
-# Criado em: 2026-11-12 15:02:56 -0300
+# Versao: 1.4.3
+# Criado em: 2026-11-12 15:55:58 -0300
 # Criado por: ChatGPT - OpenAI
 
 make clean
@@ -159,8 +302,8 @@ Use caminhos absolutos em `IFX_REPLACE_MODULE`:
 ```sql
 -- Projeto: ifxlib
 -- Troca online do modulo carregado
--- Versao: 1.4.2
--- Criado em: 2026-11-12 15:02:56 -0300
+-- Versao: 1.4.3
+-- Criado em: 2026-11-12 15:55:58 -0300
 -- Criado por: ChatGPT - OpenAI
 
 -- Substitua /opt/informix pelo INFORMIXDIR real.
@@ -176,8 +319,8 @@ Depois, altere o caminho persistente de todas as rotinas em cada banco:
 ```sql
 -- Projeto: ifxlib
 -- Atualizacao persistente dos caminhos das UDRs
--- Versao: 1.4.2
--- Criado em: 2026-11-12 15:02:56 -0300
+-- Versao: 1.4.3
+-- Criado em: 2026-11-12 15:55:58 -0300
 -- Criado por: ChatGPT - OpenAI
 
 ALTER PROCEDURE sp_cpu()
@@ -225,8 +368,8 @@ Descarregue o modulo antigo quando ele nao estiver sendo executado:
 ```sql
 -- Projeto: ifxlib
 -- Descarga do modulo anterior
--- Versao: 1.4.2
--- Criado em: 2026-11-12 15:02:56 -0300
+-- Versao: 1.4.3
+-- Criado em: 2026-11-12 15:55:58 -0300
 -- Criado por: ChatGPT - OpenAI
 
 -- Use o caminho absoluto real.
@@ -244,8 +387,8 @@ Primeiro mova o diretorio para quarentena:
 ```bash
 # Projeto: ifxlib
 # Coloca a versao anterior em quarentena
-# Versao: 1.4.2
-# Criado em: 2026-11-12 15:02:56 -0300
+# Versao: 1.4.3
+# Criado em: 2026-11-12 15:55:58 -0300
 # Criado por: ChatGPT - OpenAI
 
 old_dir="$INFORMIXDIR/extend/ifxlib.1.4.UC1"
@@ -259,8 +402,8 @@ exclua somente o diretorio colocado em quarentena:
 ```bash
 # Projeto: ifxlib
 # Exclui a versao anterior em quarentena
-# Versao: 1.4.2
-# Criado em: 2026-11-12 15:02:56 -0300
+# Versao: 1.4.3
+# Criado em: 2026-11-12 15:55:58 -0300
 # Criado por: ChatGPT - OpenAI
 
 old_dir="$INFORMIXDIR/extend/ifxlib.1.4.UC1.retired"
@@ -306,6 +449,7 @@ O estado usa memoria nomeada `PER_SESSION` e o acesso e protegido por
 - [Autorregistro de DataBlades padrao](https://help.hcl-software.com/hclinformix/1410/dmir/ids_dmir_autoregister.html)
 - [Registro com SYSBldPrepare](https://help.hcl-software.com/hclinformix/1410/dmir/ids_dmir_017.html)
 - [ALTER ROUTINE](https://help.hcl-software.com/hclinformix/1410/sqs/ids_sqs_0273.html)
+- [CLASS de UDR C](https://help.hcl-software.com/hclinformix/1410/sqs/ids_sqs_1722.html)
 - [IFX_REPLACE_MODULE](https://help.hcl-software.com/hclinformix/1410/sqs/ids_sqs_1802.html)
 - [IFX_UNLOAD_MODULE](https://help.hcl-software.com/hclinformix/1410/sqs/ids_sqs_1803.html)
 - [Gerenciamento de memoria nomeada](https://help.hcl-software.com/hclinformix/1410/dapip/ids_dapip_0755.html)

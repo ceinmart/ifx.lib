@@ -1,8 +1,15 @@
 # Changelog - ifxlib
 
-Versao do documento: 1.4.2.
-Criado em: 2026-11-12 15:02:56 -0300.
+Versao do documento: 1.4.3.
+Criado em: 2026-11-12 15:55:58 -0300.
 Criado por: ChatGPT - OpenAI.
+
+## 1.4.3 - 2026-11-12
+
+- Corrigido o registro das UDRs: removida a classe invalida `cpu vp`.
+- As UDRs C passam a usar a CPU VP padrao pela ausencia do modificador `CLASS`.
+- Adicionado `fix_vp_class.sql` para corrigir bancos registrados pelas versoes 1.4.0 a 1.4.2.
+- Adicionados exemplos de uso de todas as rotinas ao README.
 
 ## 1.4.2 - 2026-11-12
 

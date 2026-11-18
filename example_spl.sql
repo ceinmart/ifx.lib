@@ -1,7 +1,7 @@
 -- Projeto: ifxlib
 -- Arquivo: example_spl.sql
--- Versao: 1.4.2
--- Criado em: 2026-11-12 15:02:56 -0300
+-- Versao: 1.4.3
+-- Criado em: 2026-11-12 15:55:58 -0300
 -- Criado por: ChatGPT - OpenAI
 -- Exemplo de uso; adapte o processamento para sua rotina real.
 

@@ -1,7 +1,7 @@
 # Projeto: ifxlib
 # Arquivo: Makefile
-# Versao: 1.4.2
-# Criado em: 2026-11-12 15:02:56 -0300
+# Versao: 1.4.3
+# Criado em: 2026-11-12 15:55:58 -0300
 # Criado por: ChatGPT - OpenAI
 # Plataforma-alvo: HCL Informix 14.10, Linux x86_64 com GCC/compativel.
 
@@ -25,7 +25,7 @@ CPPFLAGS += -DMI_SERVBUILD \
 CFLAGS += -O2 -fPIC -Wall -Wextra
 LDFLAGS += -shared
 
-.PHONY: all clean check-env check deploy install register unregister test package help
+.PHONY: all clean check-env check deploy install register unregister test fix-vp package help
 
 all: check-env $(TARGET)
 
@@ -55,6 +55,7 @@ deploy: check
 	install -m 0644 sql/register.sql "$(DEPLOY_DIR)/register.sql"
 	install -m 0644 sql/unregister.sql "$(DEPLOY_DIR)/unregister.sql"
 	install -m 0644 sql/test.sql "$(DEPLOY_DIR)/test.sql"
+	install -m 0644 sql/fix_vp_class.sql "$(DEPLOY_DIR)/fix_vp_class.sql"
 	install -m 0644 example_spl.sql "$(DEPLOY_DIR)/example_spl.sql"
 	install -m 0644 example_sysdbopen.sql "$(DEPLOY_DIR)/example_sysdbopen.sql"
 	install -m 0644 README.md "$(DEPLOY_DIR)/README.md"
@@ -78,6 +79,10 @@ test:
 	@test -n "$(DB)" || { echo "Use: make test DB=nome_do_banco" >&2; exit 1; }
 	dbaccess "$(DB)" "$(DEPLOY_DIR)/test.sql"
 
+fix-vp:
+	@test -n "$(DB)" || { echo "Use: make fix-vp DB=nome_do_banco" >&2; exit 1; }
+	dbaccess "$(DB)" sql/fix_vp_class.sql
+
 package: check
 	rm -rf "$(DIST_DIR)/$(MODULE_DIR)"
 	install -d -m 0755 "$(DIST_DIR)/$(MODULE_DIR)"
@@ -85,6 +90,7 @@ package: check
 	install -m 0644 sql/register.sql "$(DIST_DIR)/$(MODULE_DIR)/register.sql"
 	install -m 0644 sql/unregister.sql "$(DIST_DIR)/$(MODULE_DIR)/unregister.sql"
 	install -m 0644 sql/test.sql "$(DIST_DIR)/$(MODULE_DIR)/test.sql"
+	install -m 0644 sql/fix_vp_class.sql "$(DIST_DIR)/$(MODULE_DIR)/fix_vp_class.sql"
 	install -m 0644 example_spl.sql "$(DIST_DIR)/$(MODULE_DIR)/example_spl.sql"
 	install -m 0644 example_sysdbopen.sql "$(DIST_DIR)/$(MODULE_DIR)/example_sysdbopen.sql"
 	install -m 0644 README.md "$(DIST_DIR)/$(MODULE_DIR)/README.md"
@@ -99,6 +105,7 @@ help:
 	@echo "make deploy           instala em \$$INFORMIXDIR/extend/$(MODULE_DIR)"
 	@echo "make register DB=db   registra as UDRs no banco"
 	@echo "make test DB=db       executa os testes SQL"
+	@echo "make fix-vp DB=db     corrige CLASS invalida das versoes 1.4.0 a 1.4.2"
 	@echo "make unregister DB=db remove as UDRs do banco"
 	@echo "make package          gera o pacote DataBlade-style em dist/"
 
