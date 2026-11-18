@@ -1,7 +1,7 @@
 # Projeto: ifxlib
 # Arquivo: Makefile
-# Versao: 1.4.0
-# Criado em: 2026-11-12 10:45:57 -0300
+# Versao: 1.4.1
+# Criado em: 2026-11-12 14:56:27 -0300
 # Criado por: ChatGPT - OpenAI
 # Plataforma-alvo: HCL Informix 14.10, Linux x86_64 com GCC/compativel.
 
@@ -32,7 +32,10 @@ all: check-env $(TARGET)
 check-env:
 	@test -n "$(INFORMIXDIR)" || { echo "INFORMIXDIR nao definido" >&2; exit 1; }
 	@test -r "$(INFORMIXDIR)/incl/public/mi.h" || { echo "mi.h nao encontrado em $(INFORMIXDIR)/incl/public" >&2; exit 1; }
-	@test -r "$(INFORMIXDIR)/incl/esql/datetime.h" -o -r "$(INFORMIXDIR)/incl/datetime.h" || { echo "datetime.h nao encontrado em $(INFORMIXDIR)/incl ou incl/esql" >&2; exit 1; }
+	@test -r "$(INFORMIXDIR)/incl/public/datetime.h" \
+		-o -r "$(INFORMIXDIR)/incl/esql/datetime.h" \
+		-o -r "$(INFORMIXDIR)/incl/datetime.h" \
+		|| { echo "datetime.h nao encontrado em $(INFORMIXDIR)/incl/public, incl/esql ou incl" >&2; exit 1; }
 
 $(OBJECT): ifxlib.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@

@@ -1,8 +1,14 @@
 # Changelog - ifxlib
 
-Versao do documento: 1.4.0.
-Criado em: 2026-11-12 10:45:57 -0300.
+Versao do documento: 1.4.1.
+Criado em: 2026-11-12 14:56:27 -0300.
 Criado por: ChatGPT - OpenAI.
+
+## 1.4.1 - 2026-11-12
+
+- Corrigida a validacao de `datetime.h` para aceitar `incl/public`, `incl/esql` ou `incl`.
+- Removida a execucao duplicada de `make check` pelo `install.sh`.
+- Mantido o diretorio de modulo `ifxlib.1.4.UC1`; nenhuma alteracao foi feita no codigo funcional das UDRs.
 
 ## 1.4.0 - 2026-11-12
 

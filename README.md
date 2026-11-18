@@ -1,6 +1,6 @@
 # ifxlib
 
-Versao 1.4.0 - criada em 2026-11-12 10:45:57 -0300 pelo ChatGPT - OpenAI.
+Versao 1.4.1 - criada em 2026-11-12 14:56:27 -0300 pelo ChatGPT - OpenAI.
 
 Biblioteca C para HCL Informix 14.10, empacotada no estilo de um modulo
 DataBlade para Linux x86_64.
@@ -59,8 +59,8 @@ Execute no servidor Informix com um usuario que possa gravar em
 ```bash
 # Projeto: ifxlib
 # Instalacao rapida
-# Versao: 1.4.0
-# Criado em: 2026-11-12 10:45:57 -0300
+# Versao: 1.4.1
+# Criado em: 2026-11-12 14:56:27 -0300
 # Criado por: ChatGPT - OpenAI
 
 export INFORMIXDIR=/opt/informix
@@ -86,8 +86,8 @@ Os mesmos passos podem ser executados separadamente:
 ```bash
 # Projeto: ifxlib
 # Compilacao e deploy
-# Versao: 1.4.0
-# Criado em: 2026-11-12 10:45:57 -0300
+# Versao: 1.4.1
+# Criado em: 2026-11-12 14:56:27 -0300
 # Criado por: ChatGPT - OpenAI
 
 make clean

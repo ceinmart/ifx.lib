@@ -1,8 +1,8 @@
 #!/bin/sh
 # Projeto: ifxlib
 # Arquivo: install.sh
-# Versao: 1.4.0
-# Criado em: 2026-11-12 10:45:57 -0300
+# Versao: 1.4.1
+# Criado em: 2026-11-12 14:56:27 -0300
 # Criado por: ChatGPT - OpenAI
 
 set -eu
@@ -12,8 +12,7 @@ PATH="${INFORMIXDIR}/bin:${PATH}"
 export PATH
 
 make clean
-make CC="${CC:-cc}" check
-make deploy
+make CC="${CC:-cc}" deploy
 
 echo "Implantacao concluida em ${INFORMIXDIR}/extend/ifxlib.1.4.UC1"
 echo "Para registrar: ./register.sh nome_do_banco"

@@ -1,7 +1,7 @@
 -- Projeto: ifxlib
 -- Arquivo: test.sql
--- Versao: 1.4.0
--- Criado em: 2026-11-12 10:45:57 -0300
+-- Versao: 1.4.1
+-- Criado em: 2026-11-12 14:56:27 -0300
 -- Criado por: ChatGPT - OpenAI
 
 -- Estado inicial da sessao: yield sempre.
