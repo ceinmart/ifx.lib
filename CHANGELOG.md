@@ -1,8 +1,20 @@
 # Changelog - ifxlib
 
-Versao do documento: 1.4.6.
-Criado em: 2026-11-13 10:28:59 -0300.
+Versao do documento: 1.4.7.
+Criado em: 2026-11-13 11:19:01 -0300.
 Criado por: ChatGPT - OpenAI.
+
+## 1.4.7 - 2026-11-13
+
+- Reorganizado o README em procedimentos separados de instalacao e atualizacao.
+- `install.sh` agora detecta uma instalacao existente antes do deploy.
+- Adicionada escolha entre novo diretorio, sobrescrita offline ou cancelamento.
+- A sobrescrita e bloqueada quando `onstat` confirma que a instancia esta ativa.
+- Execucoes nao interativas exigem `IFXLIB_INSTALL_MODE=new|overwrite`.
+- `make deploy` passa a recusar a substituicao de um binario existente por default.
+- O novo diretorio recebe automaticamente o proximo sufixo `UCn` disponivel.
+- `register.sql` e ajustado automaticamente para o diretorio escolhido.
+- `register.sh` e `unregister.sh` passam a localizar os SQLs pelo proprio diretorio.
 
 ## 1.4.6 - 2026-11-13
 

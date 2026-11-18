@@ -1,7 +1,7 @@
 # Projeto: ifxlib
 # Arquivo: Makefile
-# Versao: 1.4.6
-# Criado em: 2026-11-13 10:28:59 -0300
+# Versao: 1.4.7
+# Criado em: 2026-11-13 11:19:01 -0300
 # Criado por: ChatGPT - OpenAI
 # Plataforma-alvo: HCL Informix 14.10, Linux x86_64 com GCC/compativel.
 
@@ -9,7 +9,7 @@ CC ?= cc
 INFORMIXDIR ?= /opt/informix
 
 MODULE_NAME := ifxlib
-MODULE_VERSION := 1.4.UC1
+MODULE_VERSION ?= 1.4.UC1
 MODULE_DIR := $(MODULE_NAME).$(MODULE_VERSION)
 TARGET := $(MODULE_NAME).bld
 OBJECT := $(MODULE_NAME).o
@@ -47,9 +47,16 @@ check: all
 	@! nm -D --undefined-only "$(TARGET)" | grep -E ' dtcurrent$$'
 
 deploy: check
+	@if [ -e "$(DEPLOY_DIR)/$(TARGET)" ] && [ "$(ALLOW_OVERWRITE)" != "1" ]; then \
+		echo "ERRO: $(DEPLOY_DIR)/$(TARGET) ja existe." >&2; \
+		echo "Use ./install.sh para escolher uma instalacao segura." >&2; \
+		exit 1; \
+	fi
 	install -d -m 0755 "$(DEPLOY_DIR)"
 	install -m 0755 "$(TARGET)" "$(DEPLOY_DIR)/$(TARGET)"
-	install -m 0644 sql/register.sql "$(DEPLOY_DIR)/register.sql"
+	sed 's|ifxlib\.1\.4\.UC1|$(MODULE_DIR)|g' sql/register.sql > "$(DEPLOY_DIR)/register.sql.tmp"
+	install -m 0644 "$(DEPLOY_DIR)/register.sql.tmp" "$(DEPLOY_DIR)/register.sql"
+	rm -f "$(DEPLOY_DIR)/register.sql.tmp"
 	install -m 0644 sql/unregister.sql "$(DEPLOY_DIR)/unregister.sql"
 	install -m 0644 sql/test.sql "$(DEPLOY_DIR)/test.sql"
 	install -m 0644 sql/fix_vp_class.sql "$(DEPLOY_DIR)/fix_vp_class.sql"
@@ -101,7 +108,8 @@ package: check
 help:
 	@echo "make                  compila ifxlib.bld"
 	@echo "make check            valida o binario e os simbolos exportados"
-	@echo "make deploy           instala em \$$INFORMIXDIR/extend/$(MODULE_DIR)"
+	@echo "make deploy           instala somente se o destino ainda nao existir"
+	@echo "./install.sh          instala interativamente e protege contra sobrescrita online"
 	@echo "make register DB=db   registra as UDRs no banco"
 	@echo "make test DB=db       executa os testes SQL"
 	@echo "make fix-vp DB=db     corrige CLASS invalida das versoes 1.4.0 a 1.4.2"

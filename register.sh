@@ -1,8 +1,8 @@
 #!/bin/sh
 # Projeto: ifxlib
 # Arquivo: register.sh
-# Versao: 1.4.6
-# Criado em: 2026-11-13 10:28:59 -0300
+# Versao: 1.4.7
+# Criado em: 2026-11-13 11:19:01 -0300
 # Criado por: ChatGPT - OpenAI
 
 set -eu
@@ -16,9 +16,16 @@ fi
 PATH="${INFORMIXDIR}/bin:${PATH}"
 export PATH
 
-SQL_FILE="${INFORMIXDIR}/extend/ifxlib.1.4.UC1/register.sql"
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+
+if [ -r "${SCRIPT_DIR}/register.sql" ]; then
+    SQL_FILE="${SCRIPT_DIR}/register.sql"
+else
+    SQL_FILE="${SCRIPT_DIR}/sql/register.sql"
+fi
+
 test -r "$SQL_FILE" || {
-    echo "Arquivo nao encontrado: $SQL_FILE. Execute ./install.sh primeiro." >&2
+    echo "Arquivo nao encontrado: $SQL_FILE" >&2
     exit 1
 }
 
