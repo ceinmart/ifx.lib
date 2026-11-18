@@ -1,8 +1,17 @@
 # Changelog - ifxlib
 
-Versao do documento: 1.4.7.
-Criado em: 2026-11-13 11:19:01 -0300.
+Versao do documento: 1.4.8.
+Criado em: 2026-11-18 09:03:38 -0300.
 Criado por: ChatGPT - OpenAI.
+
+## 1.4.8 - 2026-11-18
+
+- Transformado `example_spl.sql` em um exemplo autocontido.
+- A procedure de demonstracao agora retorna linhas de status com `RETURN WITH RESUME`.
+- Cada linha apresenta etapa, contador, horario de `sp_current2()` e intervalo de `sp_cpu()`.
+- Adicionadas a execucao da procedure e sua remocao ao final do arquivo.
+- Padronizados `CREATE OR REPLACE PROCEDURE` e `DROP PROCEDURE IF EXISTS`.
+- Restaurado o intervalo default da sessao antes do encerramento do exemplo.
 
 ## 1.4.7 - 2026-11-13
 

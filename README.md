@@ -1,6 +1,6 @@
 # ifxlib
 
-Versao 1.4.7 - criada em 2026-11-13 11:19:01 -0300 pelo ChatGPT - OpenAI.
+Versao 1.4.8 - criada em 2026-11-18 09:03:38 -0300 pelo ChatGPT - OpenAI.
 
 Biblioteca de UDRs C para HCL Informix 14.10 em Linux x86_64.
 
@@ -45,8 +45,8 @@ instalacao anterior, oferece estas opcoes:
 ```bash
 # Projeto: ifxlib
 # Finalidade: ambiente para instalacao nova
-# Versao: 1.4.7
-# Criado em: 2026-11-13 11:19:01 -0300
+# Versao: 1.4.8
+# Criado em: 2026-11-18 09:03:38 -0300
 # Criado por: ChatGPT - OpenAI
 
 export INFORMIXDIR=/opt/informix
@@ -59,8 +59,8 @@ export PATH="$INFORMIXDIR/bin:$PATH"
 ```bash
 # Projeto: ifxlib
 # Finalidade: compilacao e deploy
-# Versao: 1.4.7
-# Criado em: 2026-11-13 11:19:01 -0300
+# Versao: 1.4.8
+# Criado em: 2026-11-18 09:03:38 -0300
 # Criado por: ChatGPT - OpenAI
 
 ./install.sh
@@ -79,8 +79,8 @@ O registro e feito separadamente em cada banco que utilizar as rotinas:
 ```bash
 # Projeto: ifxlib
 # Finalidade: registro em banco novo
-# Versao: 1.4.7
-# Criado em: 2026-11-13 11:19:01 -0300
+# Versao: 1.4.8
+# Criado em: 2026-11-18 09:03:38 -0300
 # Criado por: ChatGPT - OpenAI
 
 $INFORMIXDIR/extend/ifxlib.1.4.UC1/register.sh nome_do_banco
@@ -94,8 +94,8 @@ ja estiverem registradas.
 ```bash
 # Projeto: ifxlib
 # Finalidade: teste posterior ao registro
-# Versao: 1.4.7
-# Criado em: 2026-11-13 11:19:01 -0300
+# Versao: 1.4.8
+# Criado em: 2026-11-18 09:03:38 -0300
 # Criado por: ChatGPT - OpenAI
 
 dbaccess nome_do_banco \
@@ -133,8 +133,8 @@ Exemplo para uma instancia standalone, sem HDR/RSS/SDS:
 ```bash
 # Projeto: ifxlib
 # Finalidade: recuperacao apos sobrescrita online
-# Versao: 1.4.7
-# Criado em: 2026-11-13 11:19:01 -0300
+# Versao: 1.4.8
+# Criado em: 2026-11-18 09:03:38 -0300
 # Criado por: ChatGPT - OpenAI
 
 onstat -
@@ -170,8 +170,8 @@ Tambem e possivel selecionar a opcao sem interacao:
 ```bash
 # Projeto: ifxlib
 # Finalidade: atualizacao offline automatizada
-# Versao: 1.4.7
-# Criado em: 2026-11-13 11:19:01 -0300
+# Versao: 1.4.8
+# Criado em: 2026-11-18 09:03:38 -0300
 # Criado por: ChatGPT - OpenAI
 
 export IFXLIB_INSTALL_MODE=overwrite
@@ -191,8 +191,8 @@ Execute o instalador com a instancia ativa e escolha a opcao 1:
 ```bash
 # Projeto: ifxlib
 # Finalidade: deploy online em novo diretorio
-# Versao: 1.4.7
-# Criado em: 2026-11-13 11:19:01 -0300
+# Versao: 1.4.8
+# Criado em: 2026-11-18 09:03:38 -0300
 # Criado por: ChatGPT - OpenAI
 
 ./install.sh
@@ -206,8 +206,8 @@ Ative o novo modulo uma unica vez na instancia, usando caminhos absolutos:
 ```sql
 -- Projeto: ifxlib
 -- Finalidade: troca online do modulo
--- Versao: 1.4.7
--- Criado em: 2026-11-13 11:19:01 -0300
+-- Versao: 1.4.8
+-- Criado em: 2026-11-18 09:03:38 -0300
 -- Criado por: ChatGPT - OpenAI
 
 EXECUTE FUNCTION ifx_replace_module(
@@ -223,8 +223,8 @@ que possui as UDRs registradas:
 ```sql
 -- Projeto: ifxlib
 -- Finalidade: persistencia do novo EXTERNAL NAME
--- Versao: 1.4.7
--- Criado em: 2026-11-13 11:19:01 -0300
+-- Versao: 1.4.8
+-- Criado em: 2026-11-18 09:03:38 -0300
 -- Criado por: ChatGPT - OpenAI
 
 ALTER PROCEDURE sp_cpu()
@@ -257,8 +257,8 @@ Valide os caminhos persistidos:
 ```sql
 -- Projeto: ifxlib
 -- Finalidade: verificacao posterior a atualizacao
--- Versao: 1.4.7
--- Criado em: 2026-11-13 11:19:01 -0300
+-- Versao: 1.4.8
+-- Criado em: 2026-11-18 09:03:38 -0300
 -- Criado por: ChatGPT - OpenAI
 
 SELECT procname, numargs, externalname
@@ -285,8 +285,8 @@ Use uma destas variaveis:
 ```bash
 # Projeto: ifxlib
 # Finalidade: modos nao interativos do instalador
-# Versao: 1.4.7
-# Criado em: 2026-11-13 11:19:01 -0300
+# Versao: 1.4.8
+# Criado em: 2026-11-18 09:03:38 -0300
 # Criado por: ChatGPT - OpenAI
 
 # Novo diretorio UCn; seguro com a instancia online.
@@ -307,13 +307,18 @@ instancia esta offline.
 
 ## Exemplos de uso
 
+O arquivo `example_spl.sql` e autocontido: cria uma procedure de demonstracao,
+executa-a, exibe linhas de acompanhamento por `RETURN WITH RESUME` e executa o
+`DROP PROCEDURE IF EXISTS` ao final. As colunas retornadas sao etapa, contador, horario
+obtido por `sp_current2()` e intervalo aplicado ao `sp_cpu()`.
+
 ### Horario corrente dentro de SPL
 
 ```sql
 -- Projeto: ifxlib
 -- Finalidade: uso de sp_current2
--- Versao: 1.4.7
--- Criado em: 2026-11-13 11:19:01 -0300
+-- Versao: 1.4.8
+-- Criado em: 2026-11-18 09:03:38 -0300
 -- Criado por: ChatGPT - OpenAI
 
 DEFINE v_agora DATETIME YEAR TO FRACTION(3);
@@ -328,8 +333,8 @@ ambiente do processo `oninit`.
 ```sql
 -- Projeto: ifxlib
 -- Finalidade: configuracao de sp_cpu
--- Versao: 1.4.7
--- Criado em: 2026-11-13 11:19:01 -0300
+-- Versao: 1.4.8
+-- Criado em: 2026-11-18 09:03:38 -0300
 -- Criado por: ChatGPT - OpenAI
 
 -- Desativado: nunca executa mi_yield().
@@ -353,8 +358,8 @@ quando `counter >= intervalo` e zera o contador.
 ```sql
 -- Projeto: ifxlib
 -- Finalidade: politica administrativa da sessao
--- Versao: 1.4.7
--- Criado em: 2026-11-13 11:19:01 -0300
+-- Versao: 1.4.8
+-- Criado em: 2026-11-18 09:03:38 -0300
 -- Criado por: ChatGPT - OpenAI
 
 -- Forca yield a cada 1000 chamadas; sp_cpu(N) sera ignorado.
@@ -379,8 +384,8 @@ progresso com `sp_current2()` e `RETURN WITH RESUME`.
 ```bash
 # Projeto: ifxlib
 # Finalidade: instalacao do benchmark opcional
-# Versao: 1.4.7
-# Criado em: 2026-11-13 11:19:01 -0300
+# Versao: 1.4.8
+# Criado em: 2026-11-18 09:03:38 -0300
 # Criado por: ChatGPT - OpenAI
 
 dbaccess nome_do_banco \
@@ -392,8 +397,8 @@ Exemplos de comparacao:
 ```sql
 -- Projeto: ifxlib
 -- Finalidade: comparacao dos intervalos de yield
--- Versao: 1.4.7
--- Criado em: 2026-11-13 11:19:01 -0300
+-- Versao: 1.4.8
+-- Criado em: 2026-11-18 09:03:38 -0300
 -- Criado por: ChatGPT - OpenAI
 
 SELECT * FROM TABLE(FUNCTION sp_ifxlib_benchmark(100000, -1));
@@ -412,8 +417,8 @@ Essas versoes registravam incorretamente `CLASS='cpu vp'`, causando o erro
 ```bash
 # Projeto: ifxlib
 # Finalidade: remocao da classe de VP invalida
-# Versao: 1.4.7
-# Criado em: 2026-11-13 11:19:01 -0300
+# Versao: 1.4.8
+# Criado em: 2026-11-18 09:03:38 -0300
 # Criado por: ChatGPT - OpenAI
 
 dbaccess nome_do_banco sql/fix_vp_class.sql
@@ -428,8 +433,8 @@ estiver em uso:
 ```sql
 -- Projeto: ifxlib
 -- Finalidade: descarga de modulo antigo
--- Versao: 1.4.7
--- Criado em: 2026-11-13 11:19:01 -0300
+-- Versao: 1.4.8
+-- Criado em: 2026-11-18 09:03:38 -0300
 -- Criado por: ChatGPT - OpenAI
 
 EXECUTE FUNCTION ifx_unload_module(

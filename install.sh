@@ -1,8 +1,8 @@
 #!/bin/sh
 # Projeto: ifxlib
 # Arquivo: install.sh
-# Versao: 1.4.7
-# Criado em: 2026-11-13 11:19:01 -0300
+# Versao: 1.4.8
+# Criado em: 2026-11-18 09:03:38 -0300
 # Criado por: ChatGPT - OpenAI
 
 set -eu
