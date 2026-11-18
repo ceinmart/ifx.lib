@@ -1,9 +1,9 @@
--- Projeto: ifxlib
--- Arquivo: fix_vp_class.sql
--- Versao: 1.4.8
--- Criado em: 2026-11-18 09:03:38 -0300
--- Criado por: ChatGPT - OpenAI
--- Corrige registros feitos pelas versoes 1.4.0 a 1.4.2.
+-- Project: ifxlib
+-- File: sql/fix_vp_class.sql
+-- Version: 1.4.9
+-- Created: 2026-11-18 09:23:03 -0300
+-- Created by: ChatGPT - OpenAI
+-- Fix registrations created by versions 1.4.0 through 1.4.2.
 
 ALTER PROCEDURE sp_cpu()
     WITH (DROP CLASS);

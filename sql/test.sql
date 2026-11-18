@@ -1,33 +1,33 @@
--- Projeto: ifxlib
--- Arquivo: test.sql
--- Versao: 1.4.8
--- Criado em: 2026-11-18 09:03:38 -0300
--- Criado por: ChatGPT - OpenAI
+-- Project: ifxlib
+-- File: sql/test.sql
+-- Version: 1.4.9
+-- Created: 2026-11-18 09:23:03 -0300
+-- Created by: ChatGPT - OpenAI
 
--- Estado inicial da sessao: yield sempre.
+-- Initial session state: yield on every call.
 EXECUTE PROCEDURE sp_cpu();
 
--- Yield a cada 1000 chamadas sem parametro.
+-- Yield every 1000 no-argument calls.
 EXECUTE PROCEDURE sp_cpu(1000);
 EXECUTE PROCEDURE sp_cpu();
 
--- O force administrativo impede alteracao pela procedure.
+-- A forced administrative policy blocks procedure-level changes.
 EXECUTE PROCEDURE sp_cpu_apply_policy(1, 10000);
 EXECUTE PROCEDURE sp_cpu(1000);
 EXECUTE PROCEDURE sp_cpu();
 
--- Remove o force e permite novo override.
+-- Remove the force and allow a new override.
 EXECUTE PROCEDURE sp_cpu_apply_policy(0, 500);
 EXECUTE PROCEDURE sp_cpu(1000);
 EXECUTE PROCEDURE sp_cpu();
 
--- -1 desativa completamente o yield para a sessao.
+-- -1 disables yielding for the session.
 EXECUTE PROCEDURE sp_cpu_apply_policy(1, -1);
 EXECUTE PROCEDURE sp_cpu();
 EXECUTE PROCEDURE sp_cpu(0);
 EXECUTE PROCEDURE sp_cpu();
 
--- Remove o force; sp_cpu(INTEGER) pode reativar o mecanismo.
+-- Remove the force; sp_cpu(INTEGER) can enable yielding again.
 EXECUTE PROCEDURE sp_cpu_apply_policy(0, -1);
 EXECUTE PROCEDURE sp_cpu();
 EXECUTE PROCEDURE sp_cpu(1000);
@@ -38,9 +38,9 @@ EXECUTE PROCEDURE sp_cpu(0);
 
 EXECUTE FUNCTION sp_current2();
 
--- Compara o relogio direto do SO com o relogio publicado pelo sysmaster.
--- sh_curtime possui granularidade inferior ao FRACTION(3), portanto pequenas
--- diferencas entre as duas colunas sao esperadas.
+-- Compare the operating-system clock with the clock exposed by sysmaster.
+-- sh_curtime has less precision than FRACTION(3), so small differences are
+-- expected.
 SELECT sp_current2() AS sp_current2_os,
        dbinfo('utc_to_datetime', sh_curtime) AS sysmaster_time
   FROM sysmaster:sysshmvals;

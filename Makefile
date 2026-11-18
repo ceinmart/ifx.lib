@@ -1,9 +1,9 @@
-# Projeto: ifxlib
-# Arquivo: Makefile
-# Versao: 1.4.8
-# Criado em: 2026-11-18 09:03:38 -0300
-# Criado por: ChatGPT - OpenAI
-# Plataforma-alvo: HCL Informix 14.10, Linux x86_64 com GCC/compativel.
+# Project: ifxlib
+# File: Makefile
+# Version: 1.4.9
+# Created: 2026-11-18 09:23:03 -0300
+# Created by: ChatGPT - OpenAI
+# Target: HCL Informix 14.10, Linux x86_64, GCC or a compatible compiler.
 
 CC ?= cc
 INFORMIXDIR ?= /opt/informix
@@ -30,8 +30,8 @@ LDFLAGS += -shared
 all: check-env $(TARGET)
 
 check-env:
-	@test -n "$(INFORMIXDIR)" || { echo "INFORMIXDIR nao definido" >&2; exit 1; }
-	@test -r "$(INFORMIXDIR)/incl/public/mi.h" || { echo "mi.h nao encontrado em $(INFORMIXDIR)/incl/public" >&2; exit 1; }
+	@test -n "$(INFORMIXDIR)" || { echo "INFORMIXDIR is not set" >&2; exit 1; }
+	@test -r "$(INFORMIXDIR)/incl/public/mi.h" || { echo "mi.h was not found in $(INFORMIXDIR)/incl/public" >&2; exit 1; }
 
 $(OBJECT): ifxlib.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
@@ -42,14 +42,14 @@ $(TARGET): $(OBJECT)
 check: all
 	@file "$(TARGET)"
 	@nm -D --defined-only "$(TARGET)" | grep -E ' (sp_cpu_noarg|sp_cpu_set|sp_cpu_apply_policy|sp_current2)$$'
-	@echo "Simbolos Informix esperados como indefinidos ate o carregamento pelo servidor:"
+	@echo "Informix symbols expected to remain undefined until the server loads the module:"
 	@nm -D --undefined-only "$(TARGET)" | grep -E ' (mi_yield|mi_named_get|mi_named_zalloc|mi_lock_memory|mi_unlock_memory|mi_db_error_raise|mi_string_to_datetime)$$'
 	@! nm -D --undefined-only "$(TARGET)" | grep -E ' dtcurrent$$'
 
 deploy: check
 	@if [ -e "$(DEPLOY_DIR)/$(TARGET)" ] && [ "$(ALLOW_OVERWRITE)" != "1" ]; then \
-		echo "ERRO: $(DEPLOY_DIR)/$(TARGET) ja existe." >&2; \
-		echo "Use ./install.sh para escolher uma instalacao segura." >&2; \
+		echo "ERROR: $(DEPLOY_DIR)/$(TARGET) already exists." >&2; \
+		echo "Use ./install.sh to choose a safe installation mode." >&2; \
 		exit 1; \
 	fi
 	install -d -m 0755 "$(DEPLOY_DIR)"
@@ -64,28 +64,30 @@ deploy: check
 	install -m 0644 example_benchmark.sql "$(DEPLOY_DIR)/example_benchmark.sql"
 	install -m 0644 example_sysdbopen.sql "$(DEPLOY_DIR)/example_sysdbopen.sql"
 	install -m 0644 README.md "$(DEPLOY_DIR)/README.md"
+	install -m 0644 CHANGELOG.md "$(DEPLOY_DIR)/CHANGELOG.md"
+	install -m 0644 LICENSE "$(DEPLOY_DIR)/LICENSE"
 	install -m 0755 register.sh "$(DEPLOY_DIR)/register.sh"
 	install -m 0755 unregister.sh "$(DEPLOY_DIR)/unregister.sh"
-	@echo "ifxlib implantada em $(DEPLOY_DIR)"
+	@echo "ifxlib deployed to $(DEPLOY_DIR)"
 
 install: deploy
 
 register:
-	@test -n "$(DB)" || { echo "Use: make register DB=nome_do_banco" >&2; exit 1; }
-	@test -r "$(DEPLOY_DIR)/register.sql" || { echo "Execute make deploy primeiro" >&2; exit 1; }
+	@test -n "$(DB)" || { echo "Usage: make register DB=database" >&2; exit 1; }
+	@test -r "$(DEPLOY_DIR)/register.sql" || { echo "Run make deploy first" >&2; exit 1; }
 	dbaccess "$(DB)" "$(DEPLOY_DIR)/register.sql"
 
 unregister:
-	@test -n "$(DB)" || { echo "Use: make unregister DB=nome_do_banco" >&2; exit 1; }
-	@test -r "$(DEPLOY_DIR)/unregister.sql" || { echo "Modulo nao implantado em $(DEPLOY_DIR)" >&2; exit 1; }
+	@test -n "$(DB)" || { echo "Usage: make unregister DB=database" >&2; exit 1; }
+	@test -r "$(DEPLOY_DIR)/unregister.sql" || { echo "Module not deployed to $(DEPLOY_DIR)" >&2; exit 1; }
 	dbaccess "$(DB)" "$(DEPLOY_DIR)/unregister.sql"
 
 test:
-	@test -n "$(DB)" || { echo "Use: make test DB=nome_do_banco" >&2; exit 1; }
+	@test -n "$(DB)" || { echo "Usage: make test DB=database" >&2; exit 1; }
 	dbaccess "$(DB)" "$(DEPLOY_DIR)/test.sql"
 
 fix-vp:
-	@test -n "$(DB)" || { echo "Use: make fix-vp DB=nome_do_banco" >&2; exit 1; }
+	@test -n "$(DB)" || { echo "Usage: make fix-vp DB=database" >&2; exit 1; }
 	dbaccess "$(DB)" sql/fix_vp_class.sql
 
 package: check
@@ -100,21 +102,24 @@ package: check
 	install -m 0644 example_benchmark.sql "$(DIST_DIR)/$(MODULE_DIR)/example_benchmark.sql"
 	install -m 0644 example_sysdbopen.sql "$(DIST_DIR)/$(MODULE_DIR)/example_sysdbopen.sql"
 	install -m 0644 README.md "$(DIST_DIR)/$(MODULE_DIR)/README.md"
+	install -m 0644 CHANGELOG.md "$(DIST_DIR)/$(MODULE_DIR)/CHANGELOG.md"
+	install -m 0644 LICENSE "$(DIST_DIR)/$(MODULE_DIR)/LICENSE"
+	install -m 0644 SHA256SUMS.txt "$(DIST_DIR)/$(MODULE_DIR)/SHA256SUMS.txt"
 	install -m 0755 register.sh "$(DIST_DIR)/$(MODULE_DIR)/register.sh"
 	install -m 0755 unregister.sh "$(DIST_DIR)/$(MODULE_DIR)/unregister.sh"
 	tar -C "$(DIST_DIR)" -czf "$(DIST_DIR)/$(MODULE_DIR).tar.gz" "$(MODULE_DIR)"
-	@echo "Pacote criado: $(DIST_DIR)/$(MODULE_DIR).tar.gz"
+	@echo "Package created: $(DIST_DIR)/$(MODULE_DIR).tar.gz"
 
 help:
-	@echo "make                  compila ifxlib.bld"
-	@echo "make check            valida o binario e os simbolos exportados"
-	@echo "make deploy           instala somente se o destino ainda nao existir"
-	@echo "./install.sh          instala interativamente e protege contra sobrescrita online"
-	@echo "make register DB=db   registra as UDRs no banco"
-	@echo "make test DB=db       executa os testes SQL"
-	@echo "make fix-vp DB=db     corrige CLASS invalida das versoes 1.4.0 a 1.4.2"
-	@echo "make unregister DB=db remove as UDRs do banco"
-	@echo "make package          gera o pacote DataBlade-style em dist/"
+	@echo "make                  build ifxlib.bld"
+	@echo "make check            validate the binary and exported symbols"
+	@echo "make deploy           deploy only when the destination does not exist"
+	@echo "./install.sh          install interactively with online-overwrite protection"
+	@echo "make register DB=db   register the UDRs in one database"
+	@echo "make test DB=db       run the SQL tests"
+	@echo "make fix-vp DB=db     fix the invalid CLASS used by versions 1.4.0 through 1.4.2"
+	@echo "make unregister DB=db unregister the UDRs from one database"
+	@echo "make package          create a DataBlade-style package under dist/"
 
 clean:
 	rm -f "$(OBJECT)" "$(TARGET)"

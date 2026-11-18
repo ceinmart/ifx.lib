@@ -1,32 +1,32 @@
--- Projeto: ifxlib
--- Arquivo: register.sql
--- Versao: 1.4.8
--- Criado em: 2026-11-18 09:03:38 -0300
--- Criado por: ChatGPT - OpenAI
--- Registre no banco local com logging, usando um usuario DBA/EXTEND.
+-- Project: ifxlib
+-- File: sql/register.sql
+-- Version: 1.4.9
+-- Created: 2026-11-18 09:23:03 -0300
+-- Created by: ChatGPT - OpenAI
+-- Run in a logged local database as a DBA or a user with the EXTEND role.
 
-CREATE PROCEDURE sp_cpu()
+CREATE OR REPLACE PROCEDURE sp_cpu()
     EXTERNAL NAME '$INFORMIXDIR/extend/ifxlib.1.4.UC1/ifxlib.bld(sp_cpu_noarg)'
     LANGUAGE C;
 
-CREATE PROCEDURE sp_cpu(INTEGER)
+CREATE OR REPLACE PROCEDURE sp_cpu(INTEGER)
     EXTERNAL NAME '$INFORMIXDIR/extend/ifxlib.1.4.UC1/ifxlib.bld(sp_cpu_set)'
     LANGUAGE C;
 
-CREATE PROCEDURE sp_cpu_apply_policy(INTEGER, INTEGER)
+CREATE OR REPLACE PROCEDURE sp_cpu_apply_policy(INTEGER, INTEGER)
     EXTERNAL NAME '$INFORMIXDIR/extend/ifxlib.1.4.UC1/ifxlib.bld(sp_cpu_apply_policy)'
     LANGUAGE C;
 
--- Aliases de compatibilidade.
-CREATE PROCEDURE sp_yield()
+-- Compatibility aliases.
+CREATE OR REPLACE PROCEDURE sp_yield()
     EXTERNAL NAME '$INFORMIXDIR/extend/ifxlib.1.4.UC1/ifxlib.bld(sp_cpu_noarg)'
     LANGUAGE C;
 
-CREATE PROCEDURE sp_yield(INTEGER)
+CREATE OR REPLACE PROCEDURE sp_yield(INTEGER)
     EXTERNAL NAME '$INFORMIXDIR/extend/ifxlib.1.4.UC1/ifxlib.bld(sp_cpu_set)'
     LANGUAGE C;
 
-CREATE FUNCTION sp_current2()
+CREATE OR REPLACE FUNCTION sp_current2()
     RETURNS DATETIME YEAR TO FRACTION(3)
     WITH (VARIANT)
     EXTERNAL NAME '$INFORMIXDIR/extend/ifxlib.1.4.UC1/ifxlib.bld(sp_current2)'

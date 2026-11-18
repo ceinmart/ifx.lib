@@ -1,18 +1,18 @@
 #!/bin/sh
-# Projeto: ifxlib
-# Arquivo: unregister.sh
-# Versao: 1.4.8
-# Criado em: 2026-11-18 09:03:38 -0300
-# Criado por: ChatGPT - OpenAI
+# Project: ifxlib
+# File: unregister.sh
+# Version: 1.4.9
+# Created: 2026-11-18 09:23:03 -0300
+# Created by: ChatGPT - OpenAI
 
 set -eu
 
 if [ "$#" -ne 1 ]; then
-    echo "Uso: $0 nome_do_banco" >&2
+    echo "Usage: $0 database" >&2
     exit 2
 fi
 
-: "${INFORMIXDIR:?Defina INFORMIXDIR antes de executar}"
+: "${INFORMIXDIR:?Set INFORMIXDIR before running this script}"
 PATH="${INFORMIXDIR}/bin:${PATH}"
 export PATH
 
@@ -25,7 +25,7 @@ else
 fi
 
 test -r "$SQL_FILE" || {
-    echo "Arquivo nao encontrado: $SQL_FILE" >&2
+    echo "ERROR: file not found: $SQL_FILE" >&2
     exit 1
 }
 

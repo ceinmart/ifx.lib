@@ -1,22 +1,22 @@
 /*
- * Projeto: ifxlib
- * Arquivo: ifxlib.c
- * Versao: 1.4.8
- * Criado em: 2026-11-18 09:03:38 -0300
- * Criado por: ChatGPT - OpenAI
+ * Project: ifxlib
+ * File: ifxlib.c
+ * Version: 1.4.9
+ * Created: 2026-11-18 09:23:03 -0300
+ * Created by: ChatGPT - OpenAI
  *
- * Resumo:
- *   - sp_cpu(): chama mi_yield() conforme um intervalo mantido por sessao.
- *   - sp_cpu(INTEGER): configura o intervalo normal da procedure.
- *   - sp_cpu_apply_policy(INTEGER, INTEGER): aplica, na sessao atual, uma
- *     politica administrativa definida pelo sysdbopen.
- *   - sp_current2(): retorna o relogio corrente do sistema operacional.
+ * Summary:
+ *   - sp_cpu(): calls mi_yield() according to a per-session interval.
+ *   - sp_cpu(INTEGER): sets the normal interval for the session.
+ *   - sp_cpu_apply_policy(INTEGER, INTEGER): applies an administrative
+ *     policy to the current session, typically from sysdbopen.
+ *   - sp_current2(): returns the current operating-system clock.
  *
- * Plataforma-alvo: HCL Informix 14.10, Linux x86_64.
+ * Target platform: HCL Informix 14.10, Linux x86_64.
  *
- * AVISO:
- *   Esta biblioteca e carregada dentro de um processo oninit. Erros de
- *   memoria, locking ou chamadas inseguras podem afetar toda a instancia.
+ * WARNING:
+ *   This library is loaded into an oninit process. Memory errors, incorrect
+ *   locking, or unsafe calls can affect the entire Informix instance.
  */
 
 #include <mi.h>
@@ -32,8 +32,8 @@
 #endif
 
 /*
- * Namespace proprio da ifxlib. O sufixo v1 identifica a primeira estrutura
- * de estado publicada com o novo nome do modulo.
+ * Private ifxlib namespace. The v1 suffix identifies the first session-state
+ * structure published under the current module name.
  */
 #define SP_CPU_STATE_NAME "ifxlib.sp_cpu.state.v1"
 
@@ -45,7 +45,7 @@ typedef struct sp_cpu_session_state
     mi_integer counter;
 } sp_cpu_session_state;
 
-/* Recupera ou cria um bloco zerado pertencente a sessao atual. */
+/* Retrieve or create a zero-initialized block owned by the current session. */
 static sp_cpu_session_state *
 sp_cpu_get_state(void)
 {
@@ -75,7 +75,7 @@ sp_cpu_get_state(void)
     if (status == MI_OK)
         return state;
 
-    /* Outra invocacao da mesma sessao pode ter criado o bloco primeiro. */
+    /* Another invocation in the same session might have created it first. */
     if (status == MI_NAME_ALREADY_EXISTS)
     {
         state = NULL;
@@ -91,7 +91,7 @@ sp_cpu_get_state(void)
     return NULL;
 }
 
-/* Obtem o mutex do bloco de memoria nomeada. */
+/* Acquire the mutex for the named-memory block. */
 static mi_integer
 sp_cpu_lock_state(void)
 {
@@ -108,7 +108,7 @@ sp_cpu_lock_state(void)
     return MI_OK;
 }
 
-/* Libera o mutex. Nenhuma chamada que possa gerar excecao ocorre antes dela. */
+/* Release the mutex before any operation that can raise an exception. */
 static mi_integer
 sp_cpu_unlock_state(void)
 {
@@ -126,17 +126,17 @@ sp_cpu_unlock_state(void)
 }
 
 /*
- * Implementacao das assinaturas SQL sp_cpu() e sp_yield().
+ * Implementation of the SQL signatures sp_cpu() and sp_yield().
  *
- * intervalo_efetivo = admin_force ? admin_interval : procedure_interval
+ * effective_interval = admin_force ? admin_interval : procedure_interval
  *
- * Se o intervalo efetivo for -1, retorna sem fazer nada. Se for zero,
- * executa yield sempre. Se for positivo:
+ * An effective interval of -1 returns immediately. Zero yields on every
+ * call. A positive value uses the following counter:
  *
  *   counter = counter + 1
- *   if counter >= intervalo_efetivo: yield
+ *   if counter >= effective_interval: yield
  *
- * O mutex e liberado antes de chamar mi_yield().
+ * The mutex is released before mi_yield() is called.
  */
 IFXLIB_EXPORT void
 sp_cpu_noarg(void)
@@ -159,7 +159,7 @@ sp_cpu_noarg(void)
 
     if (effective_interval == -1)
     {
-        /* Modo desativado: nao incrementa contador e nao executa yield. */
+        /* Disabled mode: do not increment the counter and do not yield. */
     }
     else if (effective_interval == 0)
     {
@@ -183,12 +183,12 @@ sp_cpu_noarg(void)
 }
 
 /*
- * Implementacao das assinaturas SQL sp_cpu(INTEGER) e sp_yield(INTEGER).
+ * Implementation of the SQL signatures sp_cpu(INTEGER) and
+ * sp_yield(INTEGER).
  *
- * O intervalo -1 desativa o yield. Sem admin_force, altera o intervalo normal
- * e zera o contador. Com
- * admin_force ativo, a chamada e ignorada completamente para que a procedure
- * nao consiga alterar nem o intervalo nem a contagem administrativa.
+ * Interval -1 disables yielding. Without admin_force, this changes the normal
+ * interval and resets the counter. With admin_force enabled, the call is
+ * ignored so application procedures cannot change the administrative policy.
  */
 IFXLIB_EXPORT void
 sp_cpu_set(mi_integer interval)
@@ -222,25 +222,25 @@ sp_cpu_set(mi_integer interval)
     if (sp_cpu_unlock_state() != MI_OK)
         return;
 
-    /* Mantem a semantica historica de sp_cpu(0), mas somente sem force. */
+    /* Preserve the historical sp_cpu(0) behavior when no policy is forced. */
     if (must_yield)
         mi_yield();
 }
 
 /*
- * Aplica a politica administrativa na sessao atual.
+ * Apply an administrative policy to the current session.
  *
- * O valor -1 significa modo desativado, sem chamadas a mi_yield().
+ * Value -1 disables all calls to mi_yield().
  *
  * admin_force = 1:
- *   admin_interval passa a ser o intervalo efetivo e sp_cpu(INTEGER) nao
- *   consegue altera-lo nem reiniciar seu contador.
+ *   admin_interval becomes effective, and sp_cpu(INTEGER) cannot change it or
+ *   reset its counter.
  *
  * admin_force = 0:
- *   remove o force e usa admin_interval como intervalo inicial/default da
- *   sessao. Chamadas posteriores de sp_cpu(INTEGER) podem altera-lo.
+ *   remove the forced policy and use admin_interval as the session default.
+ *   Later calls to sp_cpu(INTEGER) can change it.
  *
- * Esta funcao apenas configura o estado; ela nao chama mi_yield().
+ * This function only configures state; it does not call mi_yield().
  */
 IFXLIB_EXPORT void
 sp_cpu_apply_policy(mi_integer admin_force, mi_integer admin_interval)
@@ -279,12 +279,12 @@ sp_cpu_apply_policy(mi_integer admin_force, mi_integer admin_interval)
 }
 
 /*
- * Retorna a data/hora atual como DATETIME YEAR TO FRACTION(3).
+ * Return current time as DATETIME YEAR TO FRACTION(3).
  *
- * gettimeofday() consulta diretamente o relogio do sistema operacional.
- * localtime_r() converte o epoch para o fuso horario do processo oninit.
- * mi_string_to_datetime() converte o texto ANSI para o formato binario do
- * DATETIME Informix, sem usar CURRENT ou dtcurrent().
+ * gettimeofday() reads the operating-system clock directly. localtime_r()
+ * converts the epoch using the oninit process timezone.
+ * mi_string_to_datetime() converts ANSI text into the Informix DATETIME
+ * binary format without using CURRENT or dtcurrent().
  */
 IFXLIB_EXPORT mi_datetime *
 sp_current2(void)

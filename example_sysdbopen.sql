@@ -1,34 +1,34 @@
--- Projeto: ifxlib
--- Arquivo: example_sysdbopen.sql
--- Versao: 1.4.8
--- Criado em: 2026-11-18 09:03:38 -0300
--- Criado por: ChatGPT - OpenAI
+-- Project: ifxlib
+-- File: example_sysdbopen.sql
+-- Version: 1.4.9
+-- Created: 2026-11-18 09:23:03 -0300
+-- Created by: ChatGPT - OpenAI
 --
--- Exemplo conceitual. Integre esta logica ao sysdbopen existente.
--- Nao crie uma segunda rotina com o mesmo owner/nome.
+-- Conceptual example. Merge this logic into the existing sysdbopen routine.
+-- Do not create a second routine with the same owner and name.
 
-CREATE PROCEDURE public.sysdbopen()
+CREATE OR REPLACE PROCEDURE public.sysdbopen()
     DEFINE v_admin_force SMALLINT;
     DEFINE v_admin_interval INTEGER;
 
-    -- Default: configura 10000 na sessao, mas deixa a procedure alterar.
+    -- Default: interval 10000, still overridable by application procedures.
     LET v_admin_force = 0;
     LET v_admin_interval = 10000;
 
-    -- Exemplo: usuarios batch ficam obrigatoriamente no intervalo 1000.
-    IF USER IN ('batchusr', 'etlusr') THEN
+    -- Example: force batch accounts to use interval 1000.
+    IF USER IN ('batch_user', 'etl_user') THEN
         LET v_admin_force = 1;
         LET v_admin_interval = 1000;
     END IF;
 
-    -- Exemplo: usuario online usa default 5000, sem force.
-    IF USER = 'onlineusr' THEN
+    -- Example: a regular application account gets an overridable default.
+    IF USER = 'application_user' THEN
         LET v_admin_force = 0;
         LET v_admin_interval = 5000;
     END IF;
 
-    -- Exemplo: desativa completamente o yield para um usuario especifico.
-    IF USER = 'noyieldusr' THEN
+    -- Example: disable yielding for one specific administrative account.
+    IF USER = 'no_yield_user' THEN
         LET v_admin_force = 1;
         LET v_admin_interval = -1;
     END IF;

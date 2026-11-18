@@ -1,232 +1,179 @@
 # ifxlib
 
-Versao 1.4.8 - criada em 2026-11-18 09:03:38 -0300 pelo ChatGPT - OpenAI.
+Version 1.4.9 — created on 2026-11-18 09:23:03 -0300 by ChatGPT - OpenAI.
 
-Biblioteca de UDRs C para HCL Informix 14.10 em Linux x86_64.
+## About
 
-## Aviso critico sobre atualizacoes
+`ifxlib` is a small collection of C user-defined routines (UDRs) for HCL
+Informix 14.10 on 64-bit Linux. It provides cooperative CPU yielding for
+long-running SPL loops and a real-time clock function that does not inherit the
+statement-stable behavior of `CURRENT` inside SPL.
 
-Nunca sobrescreva `ifxlib.bld` enquanto a instancia Informix estiver ativa.
-Um shared object carregado permanece no mapa de memoria do servidor. Se o
-arquivo for sobrescrito, o servidor pode falhar na proxima chamada de uma UDR.
+The module is loaded into an `oninit` process. Test every release in a
+non-production instance before deployment. This is an independent community
+project and is not an HCL product or an officially supported Informix module.
 
-O `install.sh` bloqueia esse caso a partir da versao 1.4.7. Se encontrar uma
-instalacao anterior, oferece estas opcoes:
+## License
 
-1. Instalar em um novo diretorio, recomendado para atualizacao online.
-2. Sobrescrever o diretorio existente, permitido somente com a instancia offline.
-3. Cancelar sem alterar a instalacao.
+`ifxlib` is free and open-source software distributed under the permissive
+[MIT License](LICENSE). You may use, modify, and redistribute it, including in
+commercial environments, subject to the license terms. The software is
+provided without warranty.
 
-## Rotinas fornecidas
+## Provided routines
 
-| Rotina | Finalidade |
+| Routine | Purpose |
 | --- | --- |
-| `sp_cpu()` | Executa `mi_yield()` conforme o intervalo mantido na sessao. |
-| `sp_cpu(INTEGER)` | Define o intervalo normal da sessao. |
-| `sp_cpu_apply_policy(INTEGER, INTEGER)` | Aplica uma politica administrativa na sessao. |
-| `sp_yield()` e `sp_yield(INTEGER)` | Aliases de compatibilidade para `sp_cpu`. |
-| `sp_current2()` | Retorna o relogio atual do sistema operacional com milissegundos. |
+| `sp_cpu()` | Calls `mi_yield()` according to the interval stored in the current session. |
+| `sp_cpu(INTEGER)` | Changes the normal session interval and resets its internal counter. |
+| `sp_cpu_apply_policy(INTEGER, INTEGER)` | Applies a session policy, optionally forcing an administrative interval. |
+| `sp_yield()` / `sp_yield(INTEGER)` | Compatibility aliases for `sp_cpu`. |
+| `sp_current2()` | Returns the operating-system clock as `DATETIME YEAR TO FRACTION(3)`. |
 
-## Pre-requisitos
+`sp_cpu` interval meanings:
 
-- HCL Informix Server/CSDK 14.10 de 64 bits.
-- Compilador C suportado pelas machine notes da versao instalada.
-- `INFORMIXDIR`, `INFORMIXSERVER` e `PATH` configurados.
-- Permissao de gravacao em `$INFORMIXDIR/extend`.
-- Usuario DBA e role `EXTEND` quando `IFX_EXTEND_ROLE=1`.
-- Banco local com logging para registrar as UDRs.
-- Se `DB_LIBRARY_PATH` estiver configurado, ele deve incluir
+| Value | Behavior |
+| ---: | --- |
+| `-1` | Disabled; `mi_yield()` is never called. |
+| `0` | `mi_yield()` is called on every invocation. This is also the initial session default. |
+| `N > 0` | `mi_yield()` is called after every `N` no-argument invocations. |
+
+Examples:
+
+- [SPL usage and `RETURN WITH RESUME`](example_spl.sql)
+- [Optional one-million-query benchmark](example_benchmark.sql)
+- [Administrative policy through `sysdbopen`](example_sysdbopen.sql)
+- [Registration SQL](sql/register.sql)
+- [Validation SQL](sql/test.sql)
+
+## Prerequisites
+
+- HCL Informix Server or Client SDK 14.10, 64-bit.
+- Linux x86_64.
+- A C compiler supported by the machine notes for the installed Informix
+  release.
+- `INFORMIXDIR`, `INFORMIXSERVER`, and `PATH` configured.
+- Write permission under `$INFORMIXDIR/extend`.
+- DBA privileges and, when `IFX_EXTEND_ROLE=1`, the `EXTEND` role.
+- A logged local database for UDR registration.
+- If `DB_LIBRARY_PATH` is configured, it must include
   `$INFORMIXDIR/extend`.
 
-## Instalacao nova
+## First installation
 
-### 1. Prepare o ambiente
+### 1. Configure the environment
 
 ```bash
-# Projeto: ifxlib
-# Finalidade: ambiente para instalacao nova
-# Versao: 1.4.8
-# Criado em: 2026-11-18 09:03:38 -0300
-# Criado por: ChatGPT - OpenAI
+# Project: ifxlib
+# Purpose: installation environment
+# Version: 1.4.9
+# Created: 2026-11-18 09:23:03 -0300
+# Created by: ChatGPT - OpenAI
 
-export INFORMIXDIR=/opt/informix
-export INFORMIXSERVER=servidor
+export INFORMIXDIR=/path/to/informix
+export INFORMIXSERVER=server_name
 export PATH="$INFORMIXDIR/bin:$PATH"
 ```
 
-### 2. Compile e implante
+### 2. Build and deploy
 
 ```bash
-# Projeto: ifxlib
-# Finalidade: compilacao e deploy
-# Versao: 1.4.8
-# Criado em: 2026-11-18 09:03:38 -0300
-# Criado por: ChatGPT - OpenAI
-
 ./install.sh
 ```
 
-Sem instalacao anterior, o destino default e:
+With no existing installation, the default destination is:
 
 ```text
 $INFORMIXDIR/extend/ifxlib.1.4.UC1/
 ```
 
-### 3. Registre as UDRs no banco
+The installer compiles `ifxlib.bld`, validates its exported symbols, and
+copies the module, SQL files, examples, and helper scripts to the extension
+directory.
 
-O registro e feito separadamente em cada banco que utilizar as rotinas:
+### 3. Register the routines
+
+Register one database:
 
 ```bash
-# Projeto: ifxlib
-# Finalidade: registro em banco novo
-# Versao: 1.4.8
-# Criado em: 2026-11-18 09:03:38 -0300
-# Criado por: ChatGPT - OpenAI
-
-$INFORMIXDIR/extend/ifxlib.1.4.UC1/register.sh nome_do_banco
+$INFORMIXDIR/extend/ifxlib.1.4.UC1/register.sh application_db
 ```
 
-Nao execute `register.sh` novamente durante uma atualizacao quando as rotinas
-ja estiverem registradas.
-
-### 4. Valide
+Register several databases in one invocation:
 
 ```bash
-# Projeto: ifxlib
-# Finalidade: teste posterior ao registro
-# Versao: 1.4.8
-# Criado em: 2026-11-18 09:03:38 -0300
-# Criado por: ChatGPT - OpenAI
+$INFORMIXDIR/extend/ifxlib.1.4.UC1/register.sh db_one db_two db_three
+```
 
-dbaccess nome_do_banco \
+Register every non-system database returned by `sysmaster:sysdatabases`:
+
+```bash
+$INFORMIXDIR/extend/ifxlib.1.4.UC1/register.sh -all
+```
+
+`-all` excludes every database whose lower-case name begins with `sys`, which
+covers the Informix system databases such as `sysmaster`, `sysadmin`,
+`sysutils`, `sysuser`, and `sysha`. It cannot be combined with explicit
+database names. Registration stops at the first `dbaccess` error.
+
+### 4. Validate
+
+Run the validation script in every registered database:
+
+```bash
+dbaccess application_db \
   "$INFORMIXDIR/extend/ifxlib.1.4.UC1/test.sql"
 ```
 
-O teste verifica as assinaturas, os modos de `sp_cpu()` e compara
-`sp_current2()` com `sysmaster:sysshmvals`.
+## Updating an existing installation
 
-## Atualizacao de uma instalacao existente
+Never overwrite a loaded `ifxlib.bld` while Informix is online. A loaded
+shared object remains mapped into an `oninit` process, and replacing its file
+in place can cause a later UDR invocation to fail.
 
-Escolha o procedimento conforme o estado da instancia:
+Choose one of these supported update paths:
 
-| Situacao | Procedimento |
+| Requirement | Update method |
 | --- | --- |
-| Pode reiniciar a instancia | Atualizacao offline no mesmo diretorio. |
-| Nao pode reiniciar | Novo diretorio e `IFX_REPLACE_MODULE`. |
-| `ifxlib.bld` ja foi sobrescrito online | Reinicio controlado antes de usar novamente as UDRs. |
+| Informix must remain online | Install into a new directory and replace the loaded module. |
+| A controlled restart is available | Stop Informix and overwrite the existing directory. |
 
-### Recuperacao apos sobrescrita com o Informix online
+Do not run `register.sh` again merely because the binary was upgraded. Existing
+UDR registrations remain in the database and must either keep their path or be
+changed with `ALTER ... MODIFY EXTERNAL NAME`.
 
-Se `ifxlib.bld` foi sobrescrito enquanto o `oninit` estava ativo:
+### Updating into a new installation directory
 
-1. Interrompa temporariamente as chamadas a `sp_cpu`, `sp_yield` e
-   `sp_current2`.
-2. Verifique o `online.log` e o estado da instancia.
-3. Encerre a instancia de forma controlada conforme o procedimento operacional
-   do ambiente.
-4. Garanta que a instancia chegou ao modo offline, removendo a shared memory.
-5. Inicie novamente a instancia.
-6. Execute `test.sql` antes de liberar as rotinas.
+Use this method when Informix must remain online.
 
-Exemplo para uma instancia standalone, sem HDR/RSS/SDS:
+1. Run `./install.sh` and select **Install into a new directory**.
+2. The installer chooses the next available suffix, for example `UC2` after
+   `UC1`.
+3. Load the new module with `IFX_REPLACE_MODULE`, using absolute paths.
+4. Update the persistent `EXTERNAL NAME` in every database that has the UDRs.
+5. Run the new `test.sql` in every database.
+6. Keep the previous directory until all registrations and active sessions are
+   validated.
 
-```bash
-# Projeto: ifxlib
-# Finalidade: recuperacao apos sobrescrita online
-# Versao: 1.4.8
-# Criado em: 2026-11-18 09:03:38 -0300
-# Criado por: ChatGPT - OpenAI
-
-onstat -
-onmode -s
-onmode -ky
-oninit
-onstat -
-
-dbaccess nome_do_banco \
-  "$INFORMIXDIR/extend/ifxlib.1.4.UC1/test.sql"
-```
-
-`onmode -s` aguarda as sessoes terminarem e leva a instancia a quiescent.
-`onmode -ky` leva a instancia a offline e remove a shared memory. Em ambiente
-HDR, RSS ou SDS, use o procedimento de parada e failover especifico do cluster.
-
-Nao tente corrigir esse caso chamando `IFX_REPLACE_MODULE` com o mesmo caminho.
-O Informix documenta que nomes completos iguais podem produzir resultados
-imprevisiveis.
-
-### Atualizacao offline no mesmo diretorio
-
-Use quando a instancia puder ser parada:
-
-1. Pare a instancia e confirme o modo offline.
-2. Extraia a nova versao da ifxlib.
-3. Execute o instalador e escolha a opcao de sobrescrita.
-4. Inicie a instancia.
-5. Execute `test.sql` em cada banco que utiliza as rotinas.
-
-Tambem e possivel selecionar a opcao sem interacao:
+Non-interactive deployment into a new directory:
 
 ```bash
-# Projeto: ifxlib
-# Finalidade: atualizacao offline automatizada
-# Versao: 1.4.8
-# Criado em: 2026-11-18 09:03:38 -0300
-# Criado por: ChatGPT - OpenAI
-
-export IFXLIB_INSTALL_MODE=overwrite
-./install.sh
+IFXLIB_INSTALL_MODE=new ./install.sh
 ```
 
-O instalador exige `INFORMIXSERVER` e executa `onstat -`. Se a instancia
-responder como ativa, a sobrescrita e recusada.
-
-Como o caminho e as assinaturas permanecem iguais, nao execute novamente
-`register.sh`.
-
-### Atualizacao online em novo diretorio
-
-Execute o instalador com a instancia ativa e escolha a opcao 1:
-
-```bash
-# Projeto: ifxlib
-# Finalidade: deploy online em novo diretorio
-# Versao: 1.4.8
-# Criado em: 2026-11-18 09:03:38 -0300
-# Criado por: ChatGPT - OpenAI
-
-./install.sh
-```
-
-O instalador encontra o proximo sufixo disponivel. Por exemplo, se `UC1` ja
-existe, instala em `ifxlib.1.4.UC2`. Essa copia ainda nao fica ativa.
-
-Ative o novo modulo uma unica vez na instancia, usando caminhos absolutos:
+Example module replacement:
 
 ```sql
--- Projeto: ifxlib
--- Finalidade: troca online do modulo
--- Versao: 1.4.8
--- Criado em: 2026-11-18 09:03:38 -0300
--- Criado por: ChatGPT - OpenAI
-
 EXECUTE FUNCTION ifx_replace_module(
-    '/opt/informix/extend/ifxlib.1.4.UC1/ifxlib.bld',
-    '/opt/informix/extend/ifxlib.1.4.UC2/ifxlib.bld',
+    '/path/to/informix/extend/ifxlib.1.4.UC1/ifxlib.bld',
+    '/path/to/informix/extend/ifxlib.1.4.UC2/ifxlib.bld',
     'C'
 );
 ```
 
-O retorno esperado e zero. Depois altere o caminho persistente em cada banco
-que possui as UDRs registradas:
+The expected result is zero. Then update each database:
 
 ```sql
--- Projeto: ifxlib
--- Finalidade: persistencia do novo EXTERNAL NAME
--- Versao: 1.4.8
--- Criado em: 2026-11-18 09:03:38 -0300
--- Criado por: ChatGPT - OpenAI
-
 ALTER PROCEDURE sp_cpu()
     WITH (MODIFY EXTERNAL NAME =
     '$INFORMIXDIR/extend/ifxlib.1.4.UC2/ifxlib.bld(sp_cpu_noarg)');
@@ -252,15 +199,9 @@ ALTER FUNCTION sp_current2()
     '$INFORMIXDIR/extend/ifxlib.1.4.UC2/ifxlib.bld(sp_current2)');
 ```
 
-Valide os caminhos persistidos:
+Verify the stored paths:
 
 ```sql
--- Projeto: ifxlib
--- Finalidade: verificacao posterior a atualizacao
--- Versao: 1.4.8
--- Criado em: 2026-11-18 09:03:38 -0300
--- Criado por: ChatGPT - OpenAI
-
 SELECT procname, numargs, externalname
   FROM sysprocedures
  WHERE procname IN
@@ -268,205 +209,153 @@ SELECT procname, numargs, externalname
  ORDER BY procname, numargs;
 ```
 
-Por fim, execute o `test.sql` do novo diretorio. Nao remova `UC1` ate validar
-todos os bancos e garantir que nenhuma rotina ainda aponta para ele.
+Do not call `IFX_REPLACE_MODULE` with identical old and new absolute paths.
 
-## Comportamento do instalador
+### Updating in the same installation directory
 
-### Execucao interativa
+Use this method only when the Informix instance can be stopped.
 
-Quando encontra um `ifxlib.bld` existente, `install.sh` mostra o caminho e
-solicita uma escolha. Cancelar e a opcao default.
+1. Stop Informix and confirm that the instance is offline.
+2. Extract the new `ifxlib` release.
+3. Run `./install.sh` and select **Overwrite an existing directory**.
+4. Start Informix.
+5. Run `test.sql` in every registered database.
 
-### Execucao nao interativa
-
-Use uma destas variaveis:
+Non-interactive same-directory update:
 
 ```bash
-# Projeto: ifxlib
-# Finalidade: modos nao interativos do instalador
-# Versao: 1.4.8
-# Criado em: 2026-11-18 09:03:38 -0300
-# Criado por: ChatGPT - OpenAI
-
-# Novo diretorio UCn; seguro com a instancia online.
-IFXLIB_INSTALL_MODE=new ./install.sh
-
-# Mesmo diretorio; somente com a instancia offline.
-IFXLIB_INSTALL_MODE=overwrite ./install.sh
-
-# Havendo varios diretorios, identifique exatamente qual sera sobrescrito.
-IFXLIB_INSTALL_MODE=overwrite \
-IFXLIB_OVERWRITE_VERSION=1.4.UC2 \
+export IFXLIB_INSTALL_MODE=overwrite
+export IFXLIB_OVERWRITE_VERSION=1.4.UC1
 ./install.sh
 ```
 
-`make deploy` tambem recusa sobrescrever um binario existente. O uso direto
-de `ALLOW_OVERWRITE=1` deve ficar restrito a automacao que ja confirmou que a
-instancia esta offline.
+The installer requires `INFORMIXSERVER` and runs `onstat -`. If the command
+reports a running instance, the overwrite is refused. Because the module path
+does not change, no SQL re-registration is required.
 
-## Exemplos de uso
+### Recovering from an accidental online overwrite
 
-O arquivo `example_spl.sql` e autocontido: cria uma procedure de demonstracao,
-executa-a, exibe linhas de acompanhamento por `RETURN WITH RESUME` e executa o
-`DROP PROCEDURE IF EXISTS` ao final. As colunas retornadas sao etapa, contador, horario
-obtido por `sp_current2()` e intervalo aplicado ao `sp_cpu()`.
+If `ifxlib.bld` was already overwritten while Informix was online:
 
-### Horario corrente dentro de SPL
+1. Stop invoking `sp_cpu`, `sp_yield`, and `sp_current2`.
+2. Review `online.log` and the instance state.
+3. Shut down the instance according to the site's operational procedure.
+4. Confirm that shared memory was removed.
+5. Start Informix and run `test.sql` before returning the UDRs to service.
 
-```sql
--- Projeto: ifxlib
--- Finalidade: uso de sp_current2
--- Versao: 1.4.8
--- Criado em: 2026-11-18 09:03:38 -0300
--- Criado por: ChatGPT - OpenAI
+For a standalone instance without HDR, RSS, or SDS, the controlled sequence is
+typically:
 
-DEFINE v_agora DATETIME YEAR TO FRACTION(3);
-LET v_agora = sp_current2();
+```bash
+onstat -
+onmode -s
+onmode -ky
+oninit
+onstat -
 ```
 
-`sp_current2()` usa `gettimeofday()` e `localtime_r()`. O fuso horario e o do
-ambiente do processo `oninit`.
+Use the appropriate cluster failover and shutdown procedure in high-
+availability environments.
 
-### Controle de yield
+## Usage examples
+
+### Real-time clock inside SPL
 
 ```sql
--- Projeto: ifxlib
--- Finalidade: configuracao de sp_cpu
--- Versao: 1.4.8
--- Criado em: 2026-11-18 09:03:38 -0300
--- Criado por: ChatGPT - OpenAI
+DEFINE v_now DATETIME YEAR TO FRACTION(3);
+LET v_now = sp_current2();
+```
 
--- Desativado: nunca executa mi_yield().
+`sp_current2()` uses `gettimeofday()`, `localtime_r()`, and
+`mi_string_to_datetime()`. Its timezone is inherited from the `oninit`
+process.
+
+### Cooperative CPU yielding
+
+```sql
+-- Disable yielding.
 EXECUTE PROCEDURE sp_cpu(-1);
 
--- Executa mi_yield() em toda chamada.
+-- Yield on every call.
 EXECUTE PROCEDURE sp_cpu(0);
 
--- Executa mi_yield() a cada 1000 chamadas.
+-- Yield after every 1000 no-argument calls.
 EXECUTE PROCEDURE sp_cpu(1000);
 
--- Usa o intervalo mantido na sessao.
+-- Use the interval already stored in this session.
 EXECUTE PROCEDURE sp_cpu();
 ```
 
-Para intervalo positivo, `sp_cpu()` incrementa um contador, executa o yield
-quando `counter >= intervalo` e zera o contador.
-
-### Politica administrativa
+### Administrative policy
 
 ```sql
--- Projeto: ifxlib
--- Finalidade: politica administrativa da sessao
--- Versao: 1.4.8
--- Criado em: 2026-11-18 09:03:38 -0300
--- Criado por: ChatGPT - OpenAI
-
--- Forca yield a cada 1000 chamadas; sp_cpu(N) sera ignorado.
+-- Force a yield every 1000 calls; later sp_cpu(N) calls are ignored.
 EXECUTE PROCEDURE sp_cpu_apply_policy(1, 1000);
 
--- Forca o mecanismo desativado.
+-- Force yielding off.
 EXECUTE PROCEDURE sp_cpu_apply_policy(1, -1);
 
--- Remove o force e define 10000 como default alteravel.
+-- Remove the force and set an overridable default of 10000.
 EXECUTE PROCEDURE sp_cpu_apply_policy(0, 10000);
 ```
 
-Adapte `example_sysdbopen.sql` para aplicar a politica durante a abertura da
-sessao.
+See [example_sysdbopen.sql](example_sysdbopen.sql) for session initialization.
 
-## Benchmark opcional
+## Optional benchmark
 
-`example_benchmark.sql` cria `sp_ifxlib_benchmark()`, que executa 1.000.000 de
-`FOREACH SELECT` em `systables`, chama `sp_cpu()` em cada iteracao e retorna o
-progresso com `sp_current2()` e `RETURN WITH RESUME`.
+[example_benchmark.sql](example_benchmark.sql) creates
+`sp_ifxlib_benchmark()`, which performs one million catalog queries and calls
+`sp_cpu()` during each iteration. It is intentionally expensive and is never
+run by `test.sql`.
 
 ```bash
-# Projeto: ifxlib
-# Finalidade: instalacao do benchmark opcional
-# Versao: 1.4.8
-# Criado em: 2026-11-18 09:03:38 -0300
-# Criado por: ChatGPT - OpenAI
-
-dbaccess nome_do_banco \
+dbaccess benchmark_db \
   "$INFORMIXDIR/extend/ifxlib.1.4.UC1/example_benchmark.sql"
 ```
 
-Exemplos de comparacao:
-
 ```sql
--- Projeto: ifxlib
--- Finalidade: comparacao dos intervalos de yield
--- Versao: 1.4.8
--- Criado em: 2026-11-18 09:03:38 -0300
--- Criado por: ChatGPT - OpenAI
-
 SELECT * FROM TABLE(FUNCTION sp_ifxlib_benchmark(100000, -1));
 SELECT * FROM TABLE(FUNCTION sp_ifxlib_benchmark(100000, 10000));
 SELECT * FROM TABLE(FUNCTION sp_ifxlib_benchmark(100000, 1000));
 SELECT * FROM TABLE(FUNCTION sp_ifxlib_benchmark(100000, 0));
 ```
 
-O benchmark e pesado de proposito e nao e executado por `test.sql`.
+## Removing an old module directory
 
-## Correcao do erro de VP das versoes 1.4.0 a 1.4.2
-
-Essas versoes registravam incorretamente `CLASS='cpu vp'`, causando o erro
-`-9799`. Para corrigir o registro sem recriar as UDRs:
-
-```bash
-# Projeto: ifxlib
-# Finalidade: remocao da classe de VP invalida
-# Versao: 1.4.8
-# Criado em: 2026-11-18 09:03:38 -0300
-# Criado por: ChatGPT - OpenAI
-
-dbaccess nome_do_banco sql/fix_vp_class.sql
-```
-
-## Remocao de uma versao antiga
-
-Antes de remover um diretorio, confirme em todos os bancos que nenhum
-`externalname` aponta para ele. Em seguida, descarregue o modulo quando ele nao
-estiver em uso:
+Before removing an old directory, query `sysprocedures` in every database and
+confirm that no `externalname` still points to it. When the old module is no
+longer in use, unload it:
 
 ```sql
--- Projeto: ifxlib
--- Finalidade: descarga de modulo antigo
--- Versao: 1.4.8
--- Criado em: 2026-11-18 09:03:38 -0300
--- Criado por: ChatGPT - OpenAI
-
 EXECUTE FUNCTION ifx_unload_module(
-    '/opt/informix/extend/ifxlib.1.4.UC1/ifxlib.bld',
+    '/path/to/informix/extend/ifxlib.1.4.UC1/ifxlib.bld',
     'C'
 );
 ```
 
-O modulo somente pode ser descarregado quando nenhuma instrucao estiver usando
-suas UDRs. Depois de validar a nova versao, mova o diretorio antigo para
-quarentena antes de exclui-lo.
+Move the old directory to a quarantine location before permanently deleting
+it. `IFX_UNLOAD_MODULE` can unload only a module that is not currently in use.
 
-## Desinstalacao completa
+## Complete removal
 
-1. Execute `unregister.sh banco` em todos os bancos que registraram as UDRs.
-2. Confirme em `sysprocedures` que nenhuma rotina referencia `ifxlib.bld`.
-3. Execute `IFX_UNLOAD_MODULE` ou reinicie a instancia.
-4. Remova o diretorio somente depois de confirmar que o modulo nao esta em uso.
+1. Run `unregister.sh database` in every database where the UDRs exist.
+2. Confirm through `sysprocedures` that no routine references `ifxlib.bld`.
+3. Run `IFX_UNLOAD_MODULE` or restart Informix.
+4. Remove the extension directory only after the module is no longer loaded.
 
-## Autorregistro
+## Automatic registration
 
-`ifxlib` e uma extensao definida pelo usuario e nao participa do autorregistro
-reservado aos DataBlades padrao fornecidos com o servidor. O registro deve ser
-executado explicitamente em cada banco.
+`ifxlib` is a user-defined extension and does not participate in the automatic
+registration used by DataBlade modules bundled with Informix. Registration is
+explicit and database-specific.
 
-## Referencias oficiais
+## Official documentation
 
-- [Substituicao de shared object carregado](https://help.hcl-software.com/hclinformix/15.0/dbdk/ids_dbdk_274.html)
+- [Replacing a loaded shared object](https://help.hcl-software.com/hclinformix/15.0/dbdk/ids_dbdk_274.html)
 - [IFX_REPLACE_MODULE](https://help.hcl-software.com/hclinformix/1410/sqs/ids_sqs_1802.html)
 - [IFX_UNLOAD_MODULE](https://help.hcl-software.com/hclinformix/1410/sqs/ids_sqs_1803.html)
-- [Modos do servidor e onmode](https://help.hcl-software.com/hclinformix/1410/adr/ids_adr_0422.html)
-- [CLASS de UDR C](https://help.hcl-software.com/hclinformix/1410/sqs/ids_sqs_1722.html)
+- [Server modes and onmode](https://help.hcl-software.com/hclinformix/1410/adr/ids_adr_0422.html)
+- [C UDR CLASS modifier](https://help.hcl-software.com/hclinformix/1410/sqs/ids_sqs_1722.html)
 - [mi_yield()](https://www.ibm.com/docs/en/informix-servers/14.10?topic=descriptions-mi-yield-function)
-- [Chamadas de sistema seguras em C UDRs](https://help.hcl-software.com/hclinformix/1410/dapip/ids_dapip_0678.html)
-- [Conversao de DATETIME](https://help.hcl-software.com/hclinformix/1410/dapip/ids_dapip_0150.html)
+- [Safe system calls in C UDRs](https://help.hcl-software.com/hclinformix/1410/dapip/ids_dapip_0678.html)
+- [DATETIME conversion](https://help.hcl-software.com/hclinformix/1410/dapip/ids_dapip_0150.html)

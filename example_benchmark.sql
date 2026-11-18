@@ -1,21 +1,18 @@
--- Projeto: ifxlib
--- Arquivo: example_benchmark.sql
--- Versao: 1.4.8
--- Criado em: 2026-11-18 09:03:38 -0300
--- Criado por: ChatGPT - OpenAI
+-- Project: ifxlib
+-- File: example_benchmark.sql
+-- Version: 1.4.9
+-- Created: 2026-11-18 09:23:03 -0300
+-- Created by: ChatGPT - OpenAI
 --
--- Benchmark opcional. Nao faz parte do registro das UDRs e deve ser criado
--- explicitamente apenas no banco usado para o teste.
+-- Optional benchmark. Install it only in a database dedicated to testing.
 
-DROP FUNCTION IF EXISTS sp_ifxlib_benchmark(INTEGER, INTEGER);
-
-CREATE FUNCTION sp_ifxlib_benchmark(
+CREATE OR REPLACE FUNCTION sp_ifxlib_benchmark(
     p_status_interval INTEGER,
     p_cpu_interval INTEGER
 )
-RETURNING INTEGER,
-          DATETIME YEAR TO FRACTION(3),
-          DECIMAL(16,3);
+RETURNING INTEGER AS loop_count,
+          DATETIME YEAR TO FRACTION(3) AS current_time,
+          DECIMAL(16,3) AS elapsed_seconds;
 
     DEFINE v_iteration INTEGER;
     DEFINE v_loop_count INTEGER;
@@ -38,23 +35,19 @@ RETURNING INTEGER,
     LET v_loop_count = 0;
     LET v_previous = sp_current2();
 
-    -- Configura o intervalo uma vez. Se existir admin_force na sessao,
-    -- a politica administrativa prevalece e esta chamada e ignorada.
+    -- Configure once. A forced administrative policy takes precedence.
     EXECUTE PROCEDURE sp_cpu(p_cpu_interval);
 
-    -- Primeira linha do log: instante inicial do teste.
     RETURN v_loop_count, v_previous, 0.000 WITH RESUME;
 
     FOR v_iteration IN (1 TO 1000000)
 
-        -- Abre e percorre um cursor do catalogo em cada iteracao. Portanto,
-        -- o teste executa 1.000.000 de SELECTs/FOREACH em systables.
+        -- Open and consume one catalog cursor per iteration.
         FOREACH SELECT FIRST 1 tabid
                   INTO v_tabid
                   FROM systables
                  WHERE tabid > 0
 
-            -- Usa o intervalo ja definido para esta sessao.
             EXECUTE PROCEDURE sp_cpu();
 
         END FOREACH;
@@ -72,7 +65,6 @@ RETURNING INTEGER,
         END IF;
     END FOR;
 
-    -- Garante uma linha final quando o intervalo nao divide 1.000.000.
     IF MOD(v_loop_count, p_status_interval) != 0 THEN
         LET v_now = sp_current2();
         LET v_elapsed = v_now - v_previous;
@@ -84,8 +76,7 @@ RETURNING INTEGER,
 
 END FUNCTION;
 
--- Exemplos de execucao:
---
+-- Example executions:
 -- SELECT * FROM TABLE(FUNCTION sp_ifxlib_benchmark(100000, -1));
 -- SELECT * FROM TABLE(FUNCTION sp_ifxlib_benchmark(100000, 10000));
 -- SELECT * FROM TABLE(FUNCTION sp_ifxlib_benchmark(100000, 1000));
