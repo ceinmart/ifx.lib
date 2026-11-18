@@ -1,0 +1,18 @@
+# Projeto: ifxlib
+# Arquivo: SHA256SUMS.txt
+# Versao: 1.4.0
+# Criado em: 2026-11-12 10:45:57 -0300
+# Criado por: ChatGPT - OpenAI
+
+e117736acaaed0531b50e17ce294ee0209674b1043aca25abb748e008398eff8  CHANGELOG.md
+f72d3d1ba28753b4a885a5369155183b98032aa428c781396cf412a378d52be2  Makefile
+b7051791c4b6225253a8d4f16a0361cf4a3282baff73158bd338ddcc10412980  README.md
+33bd69917aeba14b68f4d8fcdae7cd86167d8f2e36fe796155a4e0c54e8a4fdf  example_spl.sql
+28cf584da8592704cb08d0bf7728bef08987ee675b6c243b61a7ce0db060dc18  example_sysdbopen.sql
+4af2550482d5254ff929e4e486a7f811901efb9b3df97db988efc53d9f8a387f  ifxlib.c
+cccadaffc429523da69bc0a2885000363496f90f05500c9e160e6d8a31c49ab6  install.sh
+36c319cac15f85ebe0e51a9d2043a8403345815fc1f81faf9be392e93c6e05e8  register.sh
+22f9199b88af0a354cf777f92b75a2057887b572570c4289fd03aa5e4cbbedc0  sql/register.sql
+4accb13eae3feef92cca75e0926afddec938ef057f967fcec0078a6507be2a44  sql/test.sql
+d8e691c1be2641a9b8478f1be5a9319bbafa0acc57509340de0138079c5e9779  sql/unregister.sql
+a71ef1b729b082f2faaa9404aea60bf6b4a3ccb447d673530a4b7134ec663e4f  unregister.sh
