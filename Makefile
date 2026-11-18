@@ -1,7 +1,7 @@
 # Projeto: ifxlib
 # Arquivo: Makefile
-# Versao: 1.4.3
-# Criado em: 2026-11-12 15:55:58 -0300
+# Versao: 1.4.4
+# Criado em: 2026-11-12 16:19:45 -0300
 # Criado por: ChatGPT - OpenAI
 # Plataforma-alvo: HCL Informix 14.10, Linux x86_64 com GCC/compativel.
 
@@ -57,6 +57,7 @@ deploy: check
 	install -m 0644 sql/test.sql "$(DEPLOY_DIR)/test.sql"
 	install -m 0644 sql/fix_vp_class.sql "$(DEPLOY_DIR)/fix_vp_class.sql"
 	install -m 0644 example_spl.sql "$(DEPLOY_DIR)/example_spl.sql"
+	install -m 0644 example_benchmark.sql "$(DEPLOY_DIR)/example_benchmark.sql"
 	install -m 0644 example_sysdbopen.sql "$(DEPLOY_DIR)/example_sysdbopen.sql"
 	install -m 0644 README.md "$(DEPLOY_DIR)/README.md"
 	install -m 0755 register.sh "$(DEPLOY_DIR)/register.sh"
@@ -92,6 +93,7 @@ package: check
 	install -m 0644 sql/test.sql "$(DIST_DIR)/$(MODULE_DIR)/test.sql"
 	install -m 0644 sql/fix_vp_class.sql "$(DIST_DIR)/$(MODULE_DIR)/fix_vp_class.sql"
 	install -m 0644 example_spl.sql "$(DIST_DIR)/$(MODULE_DIR)/example_spl.sql"
+	install -m 0644 example_benchmark.sql "$(DIST_DIR)/$(MODULE_DIR)/example_benchmark.sql"
 	install -m 0644 example_sysdbopen.sql "$(DIST_DIR)/$(MODULE_DIR)/example_sysdbopen.sql"
 	install -m 0644 README.md "$(DIST_DIR)/$(MODULE_DIR)/README.md"
 	install -m 0755 register.sh "$(DIST_DIR)/$(MODULE_DIR)/register.sh"

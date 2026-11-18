@@ -1,8 +1,16 @@
 # Changelog - ifxlib
 
-Versao do documento: 1.4.3.
-Criado em: 2026-11-12 15:55:58 -0300.
+Versao do documento: 1.4.4.
+Criado em: 2026-11-12 16:19:45 -0300.
 Criado por: ChatGPT - OpenAI.
+
+## 1.4.4 - 2026-11-12
+
+- Adicionada a cursor function opcional `sp_ifxlib_benchmark()`.
+- O benchmark executa 1.000.000 de consultas `FOREACH` em `systables`.
+- Adicionado log de progresso com `sp_current2()` e segundos entre amostras.
+- Adicionados cenarios para comparar os intervalos `-1`, `0`, `1000` e `10000`.
+- O benchmark foi mantido fora de `test.sql` para nao tornar o teste de instalacao pesado.
 
 ## 1.4.3 - 2026-11-12
 

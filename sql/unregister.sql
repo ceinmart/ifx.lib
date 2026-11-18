@@ -1,7 +1,7 @@
 -- Projeto: ifxlib
 -- Arquivo: unregister.sql
--- Versao: 1.4.3
--- Criado em: 2026-11-12 15:55:58 -0300
+-- Versao: 1.4.4
+-- Criado em: 2026-11-12 16:19:45 -0300
 -- Criado por: ChatGPT - OpenAI
 -- Execute no mesmo banco em que as UDRs foram registradas.
 
