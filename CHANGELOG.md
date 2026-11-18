@@ -1,8 +1,17 @@
 # Changelog - ifxlib
 
-Versao do documento: 1.4.5.
-Criado em: 2026-11-12 16:43:48 -0300.
+Versao do documento: 1.4.6.
+Criado em: 2026-11-13 10:28:59 -0300.
 Criado por: ChatGPT - OpenAI.
+
+## 1.4.6 - 2026-11-13
+
+- Removido o uso de `dtcurrent()` em `sp_current2()`.
+- O relogio corrente passa a ser obtido diretamente com `gettimeofday()`.
+- Adicionada conversao thread-safe para o fuso do `oninit` com `localtime_r()`.
+- Adicionada conversao ANSI para DATETIME com `mi_string_to_datetime()`.
+- Removida a dependencia de compilacao do cabecalho `datetime.h`.
+- Adicionada validacao para impedir que o binario volte a referenciar `dtcurrent`.
 
 ## 1.4.5 - 2026-11-12
 

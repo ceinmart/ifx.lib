@@ -1,7 +1,7 @@
 # Projeto: ifxlib
 # Arquivo: Makefile
-# Versao: 1.4.5
-# Criado em: 2026-11-12 16:43:48 -0300
+# Versao: 1.4.6
+# Criado em: 2026-11-13 10:28:59 -0300
 # Criado por: ChatGPT - OpenAI
 # Plataforma-alvo: HCL Informix 14.10, Linux x86_64 com GCC/compativel.
 
@@ -32,10 +32,6 @@ all: check-env $(TARGET)
 check-env:
 	@test -n "$(INFORMIXDIR)" || { echo "INFORMIXDIR nao definido" >&2; exit 1; }
 	@test -r "$(INFORMIXDIR)/incl/public/mi.h" || { echo "mi.h nao encontrado em $(INFORMIXDIR)/incl/public" >&2; exit 1; }
-	@test -r "$(INFORMIXDIR)/incl/public/datetime.h" \
-		-o -r "$(INFORMIXDIR)/incl/esql/datetime.h" \
-		-o -r "$(INFORMIXDIR)/incl/datetime.h" \
-		|| { echo "datetime.h nao encontrado em $(INFORMIXDIR)/incl/public, incl/esql ou incl" >&2; exit 1; }
 
 $(OBJECT): ifxlib.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
@@ -47,7 +43,8 @@ check: all
 	@file "$(TARGET)"
 	@nm -D --defined-only "$(TARGET)" | grep -E ' (sp_cpu_noarg|sp_cpu_set|sp_cpu_apply_policy|sp_current2)$$'
 	@echo "Simbolos Informix esperados como indefinidos ate o carregamento pelo servidor:"
-	@nm -D --undefined-only "$(TARGET)" | grep -E ' (mi_yield|mi_named_get|mi_named_zalloc|mi_lock_memory|mi_unlock_memory|mi_db_error_raise|mi_zalloc|dtcurrent)$$'
+	@nm -D --undefined-only "$(TARGET)" | grep -E ' (mi_yield|mi_named_get|mi_named_zalloc|mi_lock_memory|mi_unlock_memory|mi_db_error_raise|mi_string_to_datetime)$$'
+	@! nm -D --undefined-only "$(TARGET)" | grep -E ' dtcurrent$$'
 
 deploy: check
 	install -d -m 0755 "$(DEPLOY_DIR)"

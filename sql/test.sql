@@ -1,7 +1,7 @@
 -- Projeto: ifxlib
 -- Arquivo: test.sql
--- Versao: 1.4.5
--- Criado em: 2026-11-12 16:43:48 -0300
+-- Versao: 1.4.6
+-- Criado em: 2026-11-13 10:28:59 -0300
 -- Criado por: ChatGPT - OpenAI
 
 -- Estado inicial da sessao: yield sempre.
@@ -37,6 +37,13 @@ EXECUTE PROCEDURE sp_cpu();
 EXECUTE PROCEDURE sp_cpu(0);
 
 EXECUTE FUNCTION sp_current2();
+
+-- Compara o relogio direto do SO com o relogio publicado pelo sysmaster.
+-- sh_curtime possui granularidade inferior ao FRACTION(3), portanto pequenas
+-- diferencas entre as duas colunas sao esperadas.
+SELECT sp_current2() AS sp_current2_os,
+       dbinfo('utc_to_datetime', sh_curtime) AS sysmaster_time
+  FROM sysmaster:sysshmvals;
 
 SELECT procname, isproc, mode, externalname
   FROM sysprocedures

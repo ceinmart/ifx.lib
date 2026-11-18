@@ -1,6 +1,6 @@
 # ifxlib
 
-Versao 1.4.5 - criada em 2026-11-12 16:43:48 -0300 pelo ChatGPT - OpenAI.
+Versao 1.4.6 - criada em 2026-11-13 10:28:59 -0300 pelo ChatGPT - OpenAI.
 
 Biblioteca de UDRs C para HCL Informix 14.10 em Linux x86_64.
 
@@ -9,7 +9,8 @@ Biblioteca de UDRs C para HCL Informix 14.10 em Linux x86_64.
 - `sp_cpu()` e `sp_cpu(INTEGER)`: controlam a frequencia de `mi_yield()` por sessao.
 - `sp_cpu_apply_policy(INTEGER, INTEGER)`: aplica uma politica administrativa na sessao.
 - `sp_yield()` e `sp_yield(INTEGER)`: aliases de compatibilidade para `sp_cpu`.
-- `sp_current2()`: retorna a data/hora corrente por meio de `dtcurrent()`.
+- `sp_current2()`: retorna a data/hora corrente consultando diretamente o
+  relogio do sistema operacional.
 
 ## Pre-requisitos
 
@@ -45,8 +46,8 @@ $INFORMIXDIR/extend/ifxlib.1.4.UC1/
 ```bash
 # Projeto: ifxlib
 # Instalacao
-# Versao: 1.4.5
-# Criado em: 2026-11-12 16:43:48 -0300
+# Versao: 1.4.6
+# Criado em: 2026-11-13 10:28:59 -0300
 # Criado por: ChatGPT - OpenAI
 
 export INFORMIXDIR=/opt/informix
@@ -63,8 +64,8 @@ Alternativamente:
 ```bash
 # Projeto: ifxlib
 # Compilacao e deploy por Makefile
-# Versao: 1.4.5
-# Criado em: 2026-11-12 16:43:48 -0300
+# Versao: 1.4.6
+# Criado em: 2026-11-13 10:28:59 -0300
 # Criado por: ChatGPT - OpenAI
 
 make clean
@@ -91,8 +92,8 @@ registrar novamente. Execute:
 ```bash
 # Projeto: ifxlib
 # Correcao do registro da classe de VP
-# Versao: 1.4.5
-# Criado em: 2026-11-12 16:43:48 -0300
+# Versao: 1.4.6
+# Criado em: 2026-11-13 10:28:59 -0300
 # Criado por: ChatGPT - OpenAI
 
 dbaccess nome_do_banco sql/fix_vp_class.sql
@@ -108,13 +109,20 @@ assinaturas e preserva as rotinas e suas permissoes.
 
 ### Data e hora atual
 
+`sp_current2()` usa `gettimeofday()` e `localtime_r()`, em vez de `CURRENT` ou
+`dtcurrent()`. O valor e convertido para `DATETIME YEAR TO FRACTION(3)` por
+`mi_string_to_datetime()`. Dessa forma, novas chamadas dentro da mesma SPL nao
+reutilizam o instante de inicio da procedure.
+
+O fuso horario utilizado e o configurado no ambiente do processo `oninit`.
+
 Em SQL:
 
 ```sql
 -- Projeto: ifxlib
 -- Exemplo de sp_current2
--- Versao: 1.4.5
--- Criado em: 2026-11-12 16:43:48 -0300
+-- Versao: 1.4.6
+-- Criado em: 2026-11-13 10:28:59 -0300
 -- Criado por: ChatGPT - OpenAI
 
 EXECUTE FUNCTION sp_current2();
@@ -129,8 +137,8 @@ Em SPL:
 ```sql
 -- Projeto: ifxlib
 -- Exemplo SPL de sp_current2
--- Versao: 1.4.5
--- Criado em: 2026-11-12 16:43:48 -0300
+-- Versao: 1.4.6
+-- Criado em: 2026-11-13 10:28:59 -0300
 -- Criado por: ChatGPT - OpenAI
 
 DEFINE v_agora DATETIME YEAR TO FRACTION(3);
@@ -142,8 +150,8 @@ LET v_agora = sp_current2();
 ```sql
 -- Projeto: ifxlib
 -- Exemplos de sp_cpu
--- Versao: 1.4.5
--- Criado em: 2026-11-12 16:43:48 -0300
+-- Versao: 1.4.6
+-- Criado em: 2026-11-13 10:28:59 -0300
 -- Criado por: ChatGPT - OpenAI
 
 -- Executa mi_yield() em toda chamada.
@@ -171,8 +179,8 @@ O intervalo configurado permanece na sessao ate outra chamada de
 ```sql
 -- Projeto: ifxlib
 -- Exemplo de yield em loop SPL
--- Versao: 1.4.5
--- Criado em: 2026-11-12 16:43:48 -0300
+-- Versao: 1.4.6
+-- Criado em: 2026-11-13 10:28:59 -0300
 -- Criado por: ChatGPT - OpenAI
 
 CREATE PROCEDURE exemplo_ifxlib()
@@ -201,8 +209,8 @@ END PROCEDURE;
 ```sql
 -- Projeto: ifxlib
 -- Exemplos de politica administrativa
--- Versao: 1.4.5
--- Criado em: 2026-11-12 16:43:48 -0300
+-- Versao: 1.4.6
+-- Criado em: 2026-11-13 10:28:59 -0300
 -- Criado por: ChatGPT - OpenAI
 
 -- Forca yield a cada 1000 chamadas. sp_cpu(N) sera ignorado.
@@ -230,8 +238,8 @@ Crie a funcao somente no banco de teste:
 ```bash
 # Projeto: ifxlib
 # Benchmark opcional
-# Versao: 1.4.5
-# Criado em: 2026-11-12 16:43:48 -0300
+# Versao: 1.4.6
+# Criado em: 2026-11-13 10:28:59 -0300
 # Criado por: ChatGPT - OpenAI
 
 dbaccess nome_do_banco example_benchmark.sql
@@ -242,8 +250,8 @@ Compare os modos em sessoes novas, para reduzir interferencia entre testes:
 ```sql
 -- Projeto: ifxlib
 -- Comparacao de desempenho
--- Versao: 1.4.5
--- Criado em: 2026-11-12 16:43:48 -0300
+-- Versao: 1.4.6
+-- Criado em: 2026-11-13 10:28:59 -0300
 -- Criado por: ChatGPT - OpenAI
 
 -- Uma linha de status a cada 100.000 iteracoes; yield desativado.
@@ -269,8 +277,8 @@ A politica administrativa continua prevalecendo sobre o segundo parametro:
 ```sql
 -- Projeto: ifxlib
 -- Benchmark com force administrativo
--- Versao: 1.4.5
--- Criado em: 2026-11-12 16:43:48 -0300
+-- Versao: 1.4.6
+-- Criado em: 2026-11-13 10:28:59 -0300
 -- Criado por: ChatGPT - OpenAI
 
 EXECUTE PROCEDURE sp_cpu_apply_policy(1, 1000);
@@ -287,8 +295,8 @@ Para remover apenas o benchmark:
 ```sql
 -- Projeto: ifxlib
 -- Remocao do benchmark opcional
--- Versao: 1.4.5
--- Criado em: 2026-11-12 16:43:48 -0300
+-- Versao: 1.4.6
+-- Criado em: 2026-11-13 10:28:59 -0300
 -- Criado por: ChatGPT - OpenAI
 
 DROP FUNCTION sp_ifxlib_benchmark(INTEGER, INTEGER);
@@ -310,8 +318,8 @@ Nesta distribuicao, o registro deve ser executado explicitamente em cada banco:
 ```bash
 # Projeto: ifxlib
 # Registro em um banco
-# Versao: 1.4.5
-# Criado em: 2026-11-12 16:43:48 -0300
+# Versao: 1.4.6
+# Criado em: 2026-11-13 10:28:59 -0300
 # Criado por: ChatGPT - OpenAI
 
 ./register.sh nome_do_banco
@@ -329,8 +337,8 @@ Antes de atualizar, consulte em cada banco qual biblioteca esta registrada:
 ```sql
 -- Projeto: ifxlib
 -- Verificacao antes da atualizacao
--- Versao: 1.4.5
--- Criado em: 2026-11-12 16:43:48 -0300
+-- Versao: 1.4.6
+-- Criado em: 2026-11-13 10:28:59 -0300
 -- Criado por: ChatGPT - OpenAI
 
 SELECT procname, numargs, externalname
@@ -364,8 +372,8 @@ versao diferente. Exemplo:
 ```bash
 # Projeto: ifxlib
 # Instalacao online do novo binario
-# Versao: 1.4.5
-# Criado em: 2026-11-12 16:43:48 -0300
+# Versao: 1.4.6
+# Criado em: 2026-11-13 10:28:59 -0300
 # Criado por: ChatGPT - OpenAI
 
 make clean
@@ -381,8 +389,8 @@ Use caminhos absolutos em `IFX_REPLACE_MODULE`:
 ```sql
 -- Projeto: ifxlib
 -- Troca online do modulo carregado
--- Versao: 1.4.5
--- Criado em: 2026-11-12 16:43:48 -0300
+-- Versao: 1.4.6
+-- Criado em: 2026-11-13 10:28:59 -0300
 -- Criado por: ChatGPT - OpenAI
 
 -- Substitua /opt/informix pelo INFORMIXDIR real.
@@ -398,8 +406,8 @@ Depois, altere o caminho persistente de todas as rotinas em cada banco:
 ```sql
 -- Projeto: ifxlib
 -- Atualizacao persistente dos caminhos das UDRs
--- Versao: 1.4.5
--- Criado em: 2026-11-12 16:43:48 -0300
+-- Versao: 1.4.6
+-- Criado em: 2026-11-13 10:28:59 -0300
 -- Criado por: ChatGPT - OpenAI
 
 ALTER PROCEDURE sp_cpu()
@@ -447,8 +455,8 @@ Descarregue o modulo antigo quando ele nao estiver sendo executado:
 ```sql
 -- Projeto: ifxlib
 -- Descarga do modulo anterior
--- Versao: 1.4.5
--- Criado em: 2026-11-12 16:43:48 -0300
+-- Versao: 1.4.6
+-- Criado em: 2026-11-13 10:28:59 -0300
 -- Criado por: ChatGPT - OpenAI
 
 -- Use o caminho absoluto real.
@@ -466,8 +474,8 @@ Primeiro mova o diretorio para quarentena:
 ```bash
 # Projeto: ifxlib
 # Coloca a versao anterior em quarentena
-# Versao: 1.4.5
-# Criado em: 2026-11-12 16:43:48 -0300
+# Versao: 1.4.6
+# Criado em: 2026-11-13 10:28:59 -0300
 # Criado por: ChatGPT - OpenAI
 
 old_dir="$INFORMIXDIR/extend/ifxlib.1.4.UC1"
@@ -481,8 +489,8 @@ exclua somente o diretorio colocado em quarentena:
 ```bash
 # Projeto: ifxlib
 # Exclui a versao anterior em quarentena
-# Versao: 1.4.5
-# Criado em: 2026-11-12 16:43:48 -0300
+# Versao: 1.4.6
+# Criado em: 2026-11-13 10:28:59 -0300
 # Criado por: ChatGPT - OpenAI
 
 old_dir="$INFORMIXDIR/extend/ifxlib.1.4.UC1.retired"
@@ -537,6 +545,7 @@ O estado usa memoria nomeada `PER_SESSION` e o acesso e protegido por
 - [Gerenciamento de memoria nomeada](https://help.hcl-software.com/hclinformix/1410/dapip/ids_dapip_0755.html)
 - [Concorrencia em memoria nomeada](https://help.hcl-software.com/hclinformix/1410/dapip/ids_dapip_0758.html)
 - [mi_yield()](https://www.ibm.com/docs/en/informix-servers/14.10?topic=descriptions-mi-yield-function)
-- [dtcurrent()](https://www.ibm.com/docs/en/informix-servers/14.10.0?topic=descriptions-dtcurrent-function)
+- [Chamadas de sistema seguras em C UDRs](https://help.hcl-software.com/hclinformix/1410/dapip/ids_dapip_0678.html)
+- [Conversao de DATETIME pela DataBlade API](https://help.hcl-software.com/hclinformix/1410/dapip/ids_dapip_0150.html)
 - [FOREACH](https://help.hcl-software.com/hclinformix/1410/sqs/ids_sqs_1331.html)
 - [RETURN WITH RESUME](https://help.hcl-software.com/hclinformix/1410/sqs/ids_sqs_0063.html)

@@ -1,8 +1,8 @@
 /*
  * Projeto: ifxlib
  * Arquivo: ifxlib.c
- * Versao: 1.4.5
- * Criado em: 2026-11-12 16:43:48 -0300
+ * Versao: 1.4.6
+ * Criado em: 2026-11-13 10:28:59 -0300
  * Criado por: ChatGPT - OpenAI
  *
  * Resumo:
@@ -10,7 +10,7 @@
  *   - sp_cpu(INTEGER): configura o intervalo normal da procedure.
  *   - sp_cpu_apply_policy(INTEGER, INTEGER): aplica, na sessao atual, uma
  *     politica administrativa definida pelo sysdbopen.
- *   - sp_current2(): retorna a data/hora corrente usando dtcurrent().
+ *   - sp_current2(): retorna o relogio corrente do sistema operacional.
  *
  * Plataforma-alvo: HCL Informix 14.10, Linux x86_64.
  *
@@ -21,8 +21,9 @@
 
 #include <mi.h>
 #include <minmmem.h>
-#include <datetime.h>
 #include <stddef.h>
+#include <sys/time.h>
+#include <time.h>
 
 #if defined(__GNUC__)
 #define IFXLIB_EXPORT __attribute__((visibility("default")))
@@ -277,16 +278,71 @@ sp_cpu_apply_policy(mi_integer admin_force, mi_integer admin_interval)
     (void)sp_cpu_unlock_state();
 }
 
-/* Retorna a data/hora atual como DATETIME YEAR TO FRACTION(3). */
+/*
+ * Retorna a data/hora atual como DATETIME YEAR TO FRACTION(3).
+ *
+ * gettimeofday() consulta diretamente o relogio do sistema operacional.
+ * localtime_r() converte o epoch para o fuso horario do processo oninit.
+ * mi_string_to_datetime() converte o texto ANSI para o formato binario do
+ * DATETIME Informix, sem usar CURRENT ou dtcurrent().
+ */
 IFXLIB_EXPORT mi_datetime *
 sp_current2(void)
 {
+    struct timeval current_time;
+    struct tm local_time;
+    char datetime_text[24];
+    long milliseconds;
     mi_datetime *result;
 
-    result = (mi_datetime *)mi_zalloc(sizeof(mi_datetime));
-    if (result == NULL)
+    if (gettimeofday(&current_time, NULL) != 0)
+    {
+        mi_db_error_raise(NULL, MI_EXCEPTION,
+                          "sp_current2: gettimeofday() failed");
         return NULL;
+    }
 
-    dtcurrent((dtime_t *)result);
+    if (localtime_r(&current_time.tv_sec, &local_time) == NULL)
+    {
+        mi_db_error_raise(NULL, MI_EXCEPTION,
+                          "sp_current2: localtime_r() failed");
+        return NULL;
+    }
+
+    if (strftime(datetime_text,
+                 sizeof(datetime_text),
+                 "%Y-%m-%d %H:%M:%S",
+                 &local_time) == 0)
+    {
+        mi_db_error_raise(NULL, MI_EXCEPTION,
+                          "sp_current2: strftime() failed");
+        return NULL;
+    }
+
+    milliseconds = current_time.tv_usec / 1000L;
+    if (milliseconds < 0L || milliseconds > 999L)
+    {
+        mi_db_error_raise(NULL, MI_EXCEPTION,
+                          "sp_current2: invalid microsecond value");
+        return NULL;
+    }
+
+    datetime_text[19] = '.';
+    datetime_text[20] = (char)('0' + (milliseconds / 100L));
+    datetime_text[21] = (char)('0' + ((milliseconds / 10L) % 10L));
+    datetime_text[22] = (char)('0' + (milliseconds % 10L));
+    datetime_text[23] = '\0';
+
+    result = mi_string_to_datetime(
+        (mi_string *)datetime_text,
+        (mi_string *)"datetime year to fraction(3)");
+
+    if (result == NULL)
+    {
+        mi_db_error_raise(NULL, MI_EXCEPTION,
+                          "sp_current2: mi_string_to_datetime() failed");
+        return NULL;
+    }
+
     return result;
 }
