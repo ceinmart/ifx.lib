@@ -1,6 +1,6 @@
 # ifxlib
 
-Versao 1.4.4 - criada em 2026-11-12 16:19:45 -0300 pelo ChatGPT - OpenAI.
+Versao 1.4.5 - criada em 2026-11-12 16:43:48 -0300 pelo ChatGPT - OpenAI.
 
 Biblioteca de UDRs C para HCL Informix 14.10 em Linux x86_64.
 
@@ -45,8 +45,8 @@ $INFORMIXDIR/extend/ifxlib.1.4.UC1/
 ```bash
 # Projeto: ifxlib
 # Instalacao
-# Versao: 1.4.4
-# Criado em: 2026-11-12 16:19:45 -0300
+# Versao: 1.4.5
+# Criado em: 2026-11-12 16:43:48 -0300
 # Criado por: ChatGPT - OpenAI
 
 export INFORMIXDIR=/opt/informix
@@ -63,8 +63,8 @@ Alternativamente:
 ```bash
 # Projeto: ifxlib
 # Compilacao e deploy por Makefile
-# Versao: 1.4.4
-# Criado em: 2026-11-12 16:19:45 -0300
+# Versao: 1.4.5
+# Criado em: 2026-11-12 16:43:48 -0300
 # Criado por: ChatGPT - OpenAI
 
 make clean
@@ -91,8 +91,8 @@ registrar novamente. Execute:
 ```bash
 # Projeto: ifxlib
 # Correcao do registro da classe de VP
-# Versao: 1.4.4
-# Criado em: 2026-11-12 16:19:45 -0300
+# Versao: 1.4.5
+# Criado em: 2026-11-12 16:43:48 -0300
 # Criado por: ChatGPT - OpenAI
 
 dbaccess nome_do_banco sql/fix_vp_class.sql
@@ -113,8 +113,8 @@ Em SQL:
 ```sql
 -- Projeto: ifxlib
 -- Exemplo de sp_current2
--- Versao: 1.4.4
--- Criado em: 2026-11-12 16:19:45 -0300
+-- Versao: 1.4.5
+-- Criado em: 2026-11-12 16:43:48 -0300
 -- Criado por: ChatGPT - OpenAI
 
 EXECUTE FUNCTION sp_current2();
@@ -129,8 +129,8 @@ Em SPL:
 ```sql
 -- Projeto: ifxlib
 -- Exemplo SPL de sp_current2
--- Versao: 1.4.4
--- Criado em: 2026-11-12 16:19:45 -0300
+-- Versao: 1.4.5
+-- Criado em: 2026-11-12 16:43:48 -0300
 -- Criado por: ChatGPT - OpenAI
 
 DEFINE v_agora DATETIME YEAR TO FRACTION(3);
@@ -142,8 +142,8 @@ LET v_agora = sp_current2();
 ```sql
 -- Projeto: ifxlib
 -- Exemplos de sp_cpu
--- Versao: 1.4.4
--- Criado em: 2026-11-12 16:19:45 -0300
+-- Versao: 1.4.5
+-- Criado em: 2026-11-12 16:43:48 -0300
 -- Criado por: ChatGPT - OpenAI
 
 -- Executa mi_yield() em toda chamada.
@@ -171,8 +171,8 @@ O intervalo configurado permanece na sessao ate outra chamada de
 ```sql
 -- Projeto: ifxlib
 -- Exemplo de yield em loop SPL
--- Versao: 1.4.4
--- Criado em: 2026-11-12 16:19:45 -0300
+-- Versao: 1.4.5
+-- Criado em: 2026-11-12 16:43:48 -0300
 -- Criado por: ChatGPT - OpenAI
 
 CREATE PROCEDURE exemplo_ifxlib()
@@ -201,8 +201,8 @@ END PROCEDURE;
 ```sql
 -- Projeto: ifxlib
 -- Exemplos de politica administrativa
--- Versao: 1.4.4
--- Criado em: 2026-11-12 16:19:45 -0300
+-- Versao: 1.4.5
+-- Criado em: 2026-11-12 16:43:48 -0300
 -- Criado por: ChatGPT - OpenAI
 
 -- Forca yield a cada 1000 chamadas. sp_cpu(N) sera ignorado.
@@ -230,8 +230,8 @@ Crie a funcao somente no banco de teste:
 ```bash
 # Projeto: ifxlib
 # Benchmark opcional
-# Versao: 1.4.4
-# Criado em: 2026-11-12 16:19:45 -0300
+# Versao: 1.4.5
+# Criado em: 2026-11-12 16:43:48 -0300
 # Criado por: ChatGPT - OpenAI
 
 dbaccess nome_do_banco example_benchmark.sql
@@ -242,8 +242,8 @@ Compare os modos em sessoes novas, para reduzir interferencia entre testes:
 ```sql
 -- Projeto: ifxlib
 -- Comparacao de desempenho
--- Versao: 1.4.4
--- Criado em: 2026-11-12 16:19:45 -0300
+-- Versao: 1.4.5
+-- Criado em: 2026-11-12 16:43:48 -0300
 -- Criado por: ChatGPT - OpenAI
 
 -- Uma linha de status a cada 100.000 iteracoes; yield desativado.
@@ -269,8 +269,8 @@ A politica administrativa continua prevalecendo sobre o segundo parametro:
 ```sql
 -- Projeto: ifxlib
 -- Benchmark com force administrativo
--- Versao: 1.4.4
--- Criado em: 2026-11-12 16:19:45 -0300
+-- Versao: 1.4.5
+-- Criado em: 2026-11-12 16:43:48 -0300
 -- Criado por: ChatGPT - OpenAI
 
 EXECUTE PROCEDURE sp_cpu_apply_policy(1, 1000);
@@ -287,8 +287,8 @@ Para remover apenas o benchmark:
 ```sql
 -- Projeto: ifxlib
 -- Remocao do benchmark opcional
--- Versao: 1.4.4
--- Criado em: 2026-11-12 16:19:45 -0300
+-- Versao: 1.4.5
+-- Criado em: 2026-11-12 16:43:48 -0300
 -- Criado por: ChatGPT - OpenAI
 
 DROP FUNCTION sp_ifxlib_benchmark(INTEGER, INTEGER);
@@ -310,8 +310,8 @@ Nesta distribuicao, o registro deve ser executado explicitamente em cada banco:
 ```bash
 # Projeto: ifxlib
 # Registro em um banco
-# Versao: 1.4.4
-# Criado em: 2026-11-12 16:19:45 -0300
+# Versao: 1.4.5
+# Criado em: 2026-11-12 16:43:48 -0300
 # Criado por: ChatGPT - OpenAI
 
 ./register.sh nome_do_banco
@@ -329,8 +329,8 @@ Antes de atualizar, consulte em cada banco qual biblioteca esta registrada:
 ```sql
 -- Projeto: ifxlib
 -- Verificacao antes da atualizacao
--- Versao: 1.4.4
--- Criado em: 2026-11-12 16:19:45 -0300
+-- Versao: 1.4.5
+-- Criado em: 2026-11-12 16:43:48 -0300
 -- Criado por: ChatGPT - OpenAI
 
 SELECT procname, numargs, externalname
@@ -364,8 +364,8 @@ versao diferente. Exemplo:
 ```bash
 # Projeto: ifxlib
 # Instalacao online do novo binario
-# Versao: 1.4.4
-# Criado em: 2026-11-12 16:19:45 -0300
+# Versao: 1.4.5
+# Criado em: 2026-11-12 16:43:48 -0300
 # Criado por: ChatGPT - OpenAI
 
 make clean
@@ -381,8 +381,8 @@ Use caminhos absolutos em `IFX_REPLACE_MODULE`:
 ```sql
 -- Projeto: ifxlib
 -- Troca online do modulo carregado
--- Versao: 1.4.4
--- Criado em: 2026-11-12 16:19:45 -0300
+-- Versao: 1.4.5
+-- Criado em: 2026-11-12 16:43:48 -0300
 -- Criado por: ChatGPT - OpenAI
 
 -- Substitua /opt/informix pelo INFORMIXDIR real.
@@ -398,8 +398,8 @@ Depois, altere o caminho persistente de todas as rotinas em cada banco:
 ```sql
 -- Projeto: ifxlib
 -- Atualizacao persistente dos caminhos das UDRs
--- Versao: 1.4.4
--- Criado em: 2026-11-12 16:19:45 -0300
+-- Versao: 1.4.5
+-- Criado em: 2026-11-12 16:43:48 -0300
 -- Criado por: ChatGPT - OpenAI
 
 ALTER PROCEDURE sp_cpu()
@@ -447,8 +447,8 @@ Descarregue o modulo antigo quando ele nao estiver sendo executado:
 ```sql
 -- Projeto: ifxlib
 -- Descarga do modulo anterior
--- Versao: 1.4.4
--- Criado em: 2026-11-12 16:19:45 -0300
+-- Versao: 1.4.5
+-- Criado em: 2026-11-12 16:43:48 -0300
 -- Criado por: ChatGPT - OpenAI
 
 -- Use o caminho absoluto real.
@@ -466,8 +466,8 @@ Primeiro mova o diretorio para quarentena:
 ```bash
 # Projeto: ifxlib
 # Coloca a versao anterior em quarentena
-# Versao: 1.4.4
-# Criado em: 2026-11-12 16:19:45 -0300
+# Versao: 1.4.5
+# Criado em: 2026-11-12 16:43:48 -0300
 # Criado por: ChatGPT - OpenAI
 
 old_dir="$INFORMIXDIR/extend/ifxlib.1.4.UC1"
@@ -481,8 +481,8 @@ exclua somente o diretorio colocado em quarentena:
 ```bash
 # Projeto: ifxlib
 # Exclui a versao anterior em quarentena
-# Versao: 1.4.4
-# Criado em: 2026-11-12 16:19:45 -0300
+# Versao: 1.4.5
+# Criado em: 2026-11-12 16:43:48 -0300
 # Criado por: ChatGPT - OpenAI
 
 old_dir="$INFORMIXDIR/extend/ifxlib.1.4.UC1.retired"
@@ -506,9 +506,12 @@ A cada chamada de `sp_cpu()` sem parametro:
 2. Intervalo `-1`: retorna sem incrementar o contador e sem `mi_yield()`.
 3. Intervalo `0`: executa `mi_yield()` em toda chamada.
 4. Intervalo positivo: incrementa o contador.
-5. Executa `mi_yield()` quando `counter % intervalo == 0` e zera o contador.
+5. Executa `mi_yield()` quando `counter >= intervalo` e zera o contador.
 
 Quanto menor o intervalo positivo, mais frequente e o yield.
+
+A implementacao usa apenas incremento e comparacao. Como o contador e zerado
+apos cada yield, nao e necessario calcular o resto da divisao (`%`).
 
 ## Politica administrativa
 

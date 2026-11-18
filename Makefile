@@ -1,7 +1,7 @@
 # Projeto: ifxlib
 # Arquivo: Makefile
-# Versao: 1.4.4
-# Criado em: 2026-11-12 16:19:45 -0300
+# Versao: 1.4.5
+# Criado em: 2026-11-12 16:43:48 -0300
 # Criado por: ChatGPT - OpenAI
 # Plataforma-alvo: HCL Informix 14.10, Linux x86_64 com GCC/compativel.
 

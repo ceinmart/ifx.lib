@@ -1,8 +1,8 @@
 /*
  * Projeto: ifxlib
  * Arquivo: ifxlib.c
- * Versao: 1.4.4
- * Criado em: 2026-11-12 16:19:45 -0300
+ * Versao: 1.4.5
+ * Criado em: 2026-11-12 16:43:48 -0300
  * Criado por: ChatGPT - OpenAI
  *
  * Resumo:
@@ -133,7 +133,7 @@ sp_cpu_unlock_state(void)
  * executa yield sempre. Se for positivo:
  *
  *   counter = counter + 1
- *   if (counter % intervalo_efetivo) == 0: yield
+ *   if counter >= intervalo_efetivo: yield
  *
  * O mutex e liberado antes de chamar mi_yield().
  */
@@ -167,7 +167,7 @@ sp_cpu_noarg(void)
     else
     {
         state->counter++;
-        if ((state->counter % effective_interval) == 0)
+        if (state->counter >= effective_interval)
         {
             state->counter = 0;
             must_yield = 1;

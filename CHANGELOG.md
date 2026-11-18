@@ -1,8 +1,15 @@
 # Changelog - ifxlib
 
-Versao do documento: 1.4.4.
-Criado em: 2026-11-12 16:19:45 -0300.
+Versao do documento: 1.4.5.
+Criado em: 2026-11-12 16:43:48 -0300.
 Criado por: ChatGPT - OpenAI.
+
+## 1.4.5 - 2026-11-12
+
+- Substituido o calculo `counter % effective_interval` por uma comparacao simples.
+- `sp_cpu()` agora executa o yield quando `counter >= effective_interval`.
+- Mantida a mesma frequencia de yield para todos os intervalos suportados.
+- Eliminada uma operacao de divisao do caminho executado a cada chamada de `sp_cpu()`.
 
 ## 1.4.4 - 2026-11-12
 
